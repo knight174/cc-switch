@@ -351,6 +351,20 @@ impl Database {
             [],
         );
 
+        // 20. Claude 全局插件表（v3.15.0+ 跨 Provider 生效）
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS claude_global_plugins (\n                plugin_id TEXT PRIMARY KEY,\n                enabled BOOLEAN NOT NULL DEFAULT 1,\n                created_at INTEGER NOT NULL DEFAULT 0\n            )",
+            [],
+        )
+        .map_err(|e| AppError::Database(format!("创建 claude_global_plugins 表失败: {e}")))?;
+
+        // 21. OpenCode 插件表（v3.15.0+ 应用级）
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS opencode_plugins (\n                normalized_name TEXT PRIMARY KEY,\n                display_name TEXT NOT NULL,\n                created_at INTEGER NOT NULL DEFAULT 0\n            )",
+            [],
+        )
+        .map_err(|e| AppError::Database(format!("创建 opencode_plugins 表失败: {e}")))?;
+
         Ok(())
     }
 
@@ -429,6 +443,11 @@ impl Database {
                         log::info!("迁移数据库从 v9 到 v10（添加 Hermes Agent 支持）");
                         Self::migrate_v9_to_v10(conn)?;
                         Self::set_user_version(conn, 10)?;
+                    }
+                    10 => {
+                        log::info!("迁移数据库从 v10 到 v11（添加应用级插件管理）");
+                        Self::migrate_v10_to_v11(conn)?;
+                        Self::set_user_version(conn, 11)?;
                     }
                     _ => {
                         return Err(AppError::Database(format!(
@@ -1195,6 +1214,87 @@ impl Database {
         }
 
         log::info!("v9 -> v10 迁移完成：已添加 Hermes Agent 支持");
+        Ok(())
+    }
+
+    /// v10 -> v11 迁移：重构插件管理（废弃旧 plugins 表，创建应用专用表）
+    fn migrate_v10_to_v11(conn: &Connection) -> Result<(), AppError> {
+        // 1. 清理旧表（如果存在）
+        let _ = conn.execute("DROP TABLE IF EXISTS plugins", []);
+
+        // 2. 创建 Claude 全局插件表
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS claude_global_plugins (\n                plugin_id TEXT PRIMARY KEY,\n                enabled BOOLEAN NOT NULL DEFAULT 1,\n                created_at INTEGER NOT NULL DEFAULT 0\n            )",
+            [],
+        )
+        .map_err(|e| AppError::Database(format!("创建 claude_global_plugins 表失败: {e}")))?;
+
+        // 3. 创建 OpenCode 插件表
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS opencode_plugins (\n                normalized_name TEXT PRIMARY KEY,\n                display_name TEXT NOT NULL,\n                created_at INTEGER NOT NULL DEFAULT 0\n            )",
+            [],
+        )
+        .map_err(|e| AppError::Database(format!("创建 opencode_plugins 表失败: {e}")))?;
+
+        // 4. 从 Claude Code live config 导入 enabledPlugins
+        if let Some(home) = dirs::home_dir() {
+            let claude_settings = home.join(".claude").join("settings.json");
+            if claude_settings.exists() {
+                if let Ok(text) = std::fs::read_to_string(&claude_settings) {
+                    if let Ok(json) = serde_json::from_str::<serde_json::Value>(&text) {
+                        if let Some(obj) = json.get("enabledPlugins").and_then(|v| v.as_object()) {
+                            let now = std::time::SystemTime::now()
+                                .duration_since(std::time::UNIX_EPOCH)
+                                .unwrap_or_default()
+                                .as_secs() as i64;
+                            for (plugin_id, enabled_val) in obj {
+                                let enabled = enabled_val.as_bool().unwrap_or(true);
+                                let _ = conn.execute(
+                                    "INSERT OR IGNORE INTO claude_global_plugins (plugin_id, enabled, created_at) VALUES (?1, ?2, ?3)",
+                                    rusqlite::params![plugin_id, enabled, now],
+                                );
+                            }
+                            log::info!("v10->v11: 已从 ~/.claude/settings.json 导入 {} 个 Claude 插件", obj.len());
+                        }
+                    }
+                }
+            }
+
+            // 5. 从 OpenCode live config 导入 plugin 数组
+            let opencode_config = home.join(".config").join("opencode").join("opencode.json");
+            if opencode_config.exists() {
+                if let Ok(text) = std::fs::read_to_string(&opencode_config) {
+                    if let Ok(json) = json5::from_str::<serde_json::Value>(&text) {
+                        if let Some(arr) = json.get("plugin").and_then(|v| v.as_array()) {
+                            let now = std::time::SystemTime::now()
+                                .duration_since(std::time::UNIX_EPOCH)
+                                .unwrap_or_default()
+                                .as_secs() as i64;
+                            for plugin in arr {
+                                if let Some(name) = plugin.as_str() {
+                                    let normalized = if let Some(suffix) = name.strip_prefix("oh-my-opencode") {
+                                        if suffix.is_empty() || suffix.starts_with('@') {
+                                            format!("oh-my-openagent{suffix}")
+                                        } else {
+                                            name.to_string()
+                                        }
+                                    } else {
+                                        name.to_string()
+                                    };
+                                    let _ = conn.execute(
+                                        "INSERT OR IGNORE INTO opencode_plugins (normalized_name, display_name, created_at) VALUES (?1, ?2, ?3)",
+                                        rusqlite::params![normalized, name, now],
+                                    );
+                                }
+                            }
+                            log::info!("v10->v11: 已从 ~/.config/opencode/opencode.json 导入 {} 个 OpenCode 插件", arr.len());
+                        }
+                    }
+                }
+            }
+        }
+
+        log::info!("v10 -> v11 迁移完成：已创建 claude_global_plugins / opencode_plugins 表并从 live config 导入插件");
         Ok(())
     }
 

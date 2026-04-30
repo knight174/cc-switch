@@ -2,8 +2,10 @@
 //!
 //! Database access operations for each domain
 
+pub mod claude_plugins;
 pub mod failover;
 pub mod mcp;
+pub mod opencode_plugins;
 pub mod prompts;
 pub mod providers;
 pub mod providers_seed;

@@ -23,7 +23,7 @@ fn matches_any_plugin_prefix(plugin_name: &str, prefixes: &[&str]) -> bool {
         .any(|prefix| matches_plugin_prefix(plugin_name, prefix))
 }
 
-fn canonicalize_plugin_name(plugin_name: &str) -> String {
+pub fn canonicalize_plugin_name(plugin_name: &str) -> String {
     if let Some(suffix) = plugin_name.strip_prefix("oh-my-opencode") {
         if suffix.is_empty() || suffix.starts_with('@') {
             return format!("oh-my-openagent{suffix}");
@@ -227,6 +227,45 @@ pub fn remove_plugins_by_prefixes(prefixes: &[&str]) -> Result<(), AppError> {
         if arr.is_empty() {
             config.as_object_mut().map(|obj| obj.remove("plugin"));
         }
+    }
+
+    write_opencode_config(&config)
+}
+
+/// 将插件列表同步到 opencode.json 的 `plugin` 字段
+///
+/// 写入前会应用 OMO 互斥规则：standard OMO 和 slim OMO 不能共存，
+/// 只保留列表中第一个出现的 OMO 类型，移除其他 OMO。
+pub fn sync_opencode_plugins(plugin_names: &[String]) -> Result<(), AppError> {
+    let mut config = read_opencode_config()?;
+
+    if plugin_names.is_empty() {
+        config.as_object_mut().map(|obj| obj.remove("plugin"));
+    } else {
+        // 应用 OMO 互斥：如果列表中同时存在 standard 和 slim OMO，
+        // 只保留第一个遇到的 OMO 类型
+        let mut found_omo = false;
+        let filtered: Vec<String> = plugin_names
+            .iter()
+            .filter(|name| {
+                let is_standard = matches_any_plugin_prefix(name, &STANDARD_OMO_PLUGIN_PREFIXES);
+                let is_slim = matches_any_plugin_prefix(name, &SLIM_OMO_PLUGIN_PREFIXES);
+                if is_standard || is_slim {
+                    if found_omo {
+                        false
+                    } else {
+                        found_omo = true;
+                        true
+                    }
+                } else {
+                    true
+                }
+            })
+            .cloned()
+            .collect();
+
+        let arr: Vec<Value> = filtered.into_iter().map(Value::String).collect();
+        config["plugin"] = Value::Array(arr);
     }
 
     write_opencode_config(&config)

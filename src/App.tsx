@@ -27,6 +27,7 @@ import {
   Shield,
   Cpu,
   LayoutDashboard,
+  Puzzle,
 } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { Provider, VisibleApps } from "@/types";
@@ -68,6 +69,7 @@ import { ProxyToggle } from "@/components/proxy/ProxyToggle";
 import { FailoverToggle } from "@/components/proxy/FailoverToggle";
 import UsageScriptModal from "@/components/UsageScriptModal";
 import UnifiedMcpPanel from "@/components/mcp/UnifiedMcpPanel";
+import PluginManager from "@/components/plugins/PluginManager";
 import PromptPanel from "@/components/prompts/PromptPanel";
 import { SkillsPage } from "@/components/skills/SkillsPage";
 import UnifiedSkillsPanel from "@/components/skills/UnifiedSkillsPanel";
@@ -97,6 +99,7 @@ type View =
   | "skillsDiscovery"
   | "mcp"
   | "agents"
+  | "plugins"
   | "universal"
   | "sessions"
   | "workspace"
@@ -140,6 +143,7 @@ const VALID_VIEWS: View[] = [
   "skills",
   "skillsDiscovery",
   "mcp",
+  "plugins",
   "agents",
   "universal",
   "sessions",
@@ -934,6 +938,8 @@ function App() {
               onOpenChange={() => setCurrentView("providers")}
             />
           );
+        case "plugins":
+          return <PluginManager />;
         case "agents":
           return (
             <AgentsPanel onOpenChange={() => setCurrentView("providers")} />
@@ -1163,6 +1169,7 @@ function App() {
                   {currentView === "skills" && t("skills.title")}
                   {currentView === "skillsDiscovery" && t("skills.title")}
                   {currentView === "mcp" && t("mcp.unifiedPanel.title")}
+                  {currentView === "plugins" && t("plugins.title")}
                   {currentView === "agents" && t("agents.title")}
                   {currentView === "universal" &&
                     t("universalProvider.title", {
@@ -1421,6 +1428,15 @@ function App() {
                               >
                                 <McpIcon size={16} />
                               </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setCurrentView("plugins")}
+                                className="text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 w-8 px-2"
+                                title={t("plugins.title")}
+                              >
+                                <Puzzle className="w-4 h-4" />
+                              </Button>
                             </>
                           ) : activeApp === "openclaw" ? (
                             <>
@@ -1519,6 +1535,15 @@ function App() {
                                 title={t("mcp.title")}
                               >
                                 <McpIcon size={16} />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setCurrentView("plugins")}
+                                className="text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 w-8 px-2"
+                                title={t("plugins.title")}
+                              >
+                                <Puzzle className="w-4 h-4" />
                               </Button>
                             </>
                           )}

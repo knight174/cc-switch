@@ -40,7 +40,9 @@
     "deleting": "Deleting...",
     "auto": "Auto",
     "enabled": "Enabled",
-    "notSet": "Not Set"
+    "notSet": "Not Set",
+    "apply": "Apply",
+    "applying": "Applying..."
   },
   "firstRunNotice": {
     "title": "Welcome to CC Switch",
@@ -1304,6 +1306,42 @@
     "customDescription": "Manually configure provider, requires complete configuration",
     "officialDescription": "Official login, no API Key required",
     "presetDescription": "Use preset configuration, only API Key required"
+  },
+  "plugins": {
+    "title": "Plugin Management",
+    "import": "Import",
+    "importSuccess": "Imported {{count}} plugins",
+    "claude": {
+      "installedCount": "Installed plugins ({{count}})",
+      "addPlaceholder": "e.g. superpowers@superpowers-marketplace",
+      "empty": "No plugins",
+      "emptyDescription": "Installed plugins will appear here automatically",
+      "description": "These plugins are enabled globally for all Claude providers. Individual provider settings can override them."
+    },
+    "opencode": {
+      "addPlaceholder": "e.g. oh-my-openagent",
+      "empty": "No plugins",
+      "emptyDescription": "Added plugins will appear here automatically",
+      "description": "These plugins are written directly to opencode.json, independent of provider configuration."
+    },
+    "hermes": {
+      "installedCount": "Installed plugins ({{count}})",
+      "empty": "No plugins",
+      "emptyDescription": "Installed plugins will appear here automatically",
+      "description": "These plugins are managed by the Hermes plugin system. All are enabled by default; unchecking adds them to the disabled list."
+    },
+    "openclaw": {
+      "installedCount": "Installed plugins ({{count}})",
+      "empty": "No plugins",
+      "emptyDescription": "Installed plugins will appear here automatically",
+      "description": "These plugins are managed by the OpenClaw plugin system. Unchecking disables the plugin."
+    },
+    "codex": {
+      "installedCount": "Installed plugins ({{count}})",
+      "empty": "No plugins",
+      "emptyDescription": "Installed plugins will appear here automatically",
+      "description": "These plugins are managed by the Codex plugin system. Unchecking disables the plugin."
+    }
   },
   "mcp": {
     "title": "MCP Management",

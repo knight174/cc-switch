@@ -30,6 +30,7 @@ pub(crate) use live::sanitize_claude_settings_for_live;
 pub(crate) use live::{
     build_effective_settings_with_common_config, normalize_provider_common_config_for_storage,
     provider_exists_in_live_config, strip_common_config_from_live_settings,
+    strip_global_plugins_from_claude_settings,
     sync_current_provider_for_app_to_live, write_live_with_common_config,
 };
 
@@ -1497,6 +1498,19 @@ impl ProviderService {
                                     &current_provider,
                                     live_config,
                                 );
+                            if app_type == AppType::Claude {
+                                match strip_global_plugins_from_claude_settings(
+                                    state.db.as_ref(),
+                                    &current_provider.settings_config,
+                                ) {
+                                    Ok(settings) => current_provider.settings_config = settings,
+                                    Err(e) => {
+                                        log::warn!(
+                                            "Failed to strip global plugins while backfilling: {e}"
+                                        );
+                                    }
+                                }
+                            }
                             if let Err(e) =
                                 state.db.save_provider(app_type.as_str(), &current_provider)
                             {

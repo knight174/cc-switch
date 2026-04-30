@@ -382,6 +382,22 @@ fn write_root_section(section: &str, value: &Value) -> Result<OpenClawWriteOutco
     document.save()
 }
 
+/// 写入 OpenClaw 的 plugins.entries 配置（保留其他 plugins 字段如 allow）
+pub fn set_plugins_entries(entries: &Value) -> Result<OpenClawWriteOutcome, AppError> {
+    let mut config = read_openclaw_config()?;
+    let root = ensure_object(&mut config);
+
+    let mut plugins = root
+        .get("plugins")
+        .cloned()
+        .unwrap_or_else(|| json!({}));
+    let plugins_obj = ensure_object(&mut plugins);
+    plugins_obj.insert("entries".to_string(), entries.clone());
+    root.insert("plugins".to_string(), plugins.clone());
+
+    write_root_section("plugins", &plugins)
+}
+
 fn create_openclaw_backup(source: &str) -> Result<PathBuf, AppError> {
     let backup_dir = get_app_config_dir().join("backups").join("openclaw");
     fs::create_dir_all(&backup_dir).map_err(|e| AppError::io(&backup_dir, e))?;

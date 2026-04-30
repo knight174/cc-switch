@@ -1136,6 +1136,31 @@ pub fn run() {
             commands::rename_db_backup,
             commands::delete_db_backup,
             commands::sync_current_providers_live,
+            // Claude global plugins
+            commands::get_claude_global_plugins,
+            commands::set_claude_global_plugin,
+            commands::remove_claude_global_plugin,
+            commands::get_claude_installed_plugins,
+            commands::apply_claude_plugin_selection,
+            commands::import_claude_plugins_from_live,
+            // OpenCode plugins
+            commands::get_opencode_plugins,
+            commands::add_opencode_plugin,
+            commands::remove_opencode_plugin,
+            commands::reorder_opencode_plugins,
+            commands::import_opencode_plugins_from_live,
+            // OpenClaw plugins
+            commands::get_openclaw_installed_plugins,
+            commands::apply_openclaw_plugin_selection,
+            commands::import_openclaw_plugins_from_live,
+            // Codex plugins
+            commands::get_codex_installed_plugins,
+            commands::apply_codex_plugin_selection,
+            commands::import_codex_plugins_from_live,
+            // Hermes plugins
+            commands::get_hermes_installed_plugins,
+            commands::apply_hermes_plugin_selection,
+            commands::import_hermes_plugins_from_live,
             // Deep link import
             commands::parse_deeplink,
             commands::merge_deeplink_config,

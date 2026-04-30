@@ -40,7 +40,9 @@
     "deleting": "削除中...",
     "auto": "自動",
     "enabled": "有効",
-    "notSet": "未設定"
+    "notSet": "未設定",
+    "apply": "適用",
+    "applying": "適用中..."
   },
   "firstRunNotice": {
     "title": "CC Switch へようこそ",
@@ -1304,6 +1306,42 @@
     "customDescription": "手動で設定。完全な構成が必要",
     "officialDescription": "公式ログイン。API Key 不要",
     "presetDescription": "プリセットを使用。API Key だけ入力すれば OK"
+  },
+  "plugins": {
+    "title": "プラグイン管理",
+    "import": "インポート",
+    "importSuccess": "{{count}} 件のプラグインをインポートしました",
+    "claude": {
+      "installedCount": "インストール済みプラグイン ({{count}} 件)",
+      "addPlaceholder": "例: superpowers@superpowers-marketplace",
+      "empty": "プラグインがありません",
+      "emptyDescription": "インストールされたプラグインは自動的にここに表示されます",
+      "description": "以下のプラグインはすべての Claude プロバイダーでデフォルトで有効になります。個別のプロバイダー設定で上書き可能です。"
+    },
+    "opencode": {
+      "addPlaceholder": "例: oh-my-openagent",
+      "empty": "プラグインがありません",
+      "emptyDescription": "追加されたプラグインは自動的にここに表示されます",
+      "description": "以下のプラグインは opencode.json に直接書き込まれ、プロバイダー設定とは独立しています。"
+    },
+    "hermes": {
+      "installedCount": "インストール済みプラグイン ({{count}} 件)",
+      "empty": "プラグインがありません",
+      "emptyDescription": "インストールされたプラグインは自動的にここに表示されます",
+      "description": "以下のプラグインは Hermes プラグインシステムで管理されます。デフォルトで全て有効です。チェックを外すと無効リストに追加されます。"
+    },
+    "openclaw": {
+      "installedCount": "インストール済みプラグイン ({{count}} 件)",
+      "empty": "プラグインがありません",
+      "emptyDescription": "インストールされたプラグインは自動的にここに表示されます",
+      "description": "以下のプラグインは OpenClaw プラグインシステムで管理されます。チェックを外すとプラグインが無効になります。"
+    },
+    "codex": {
+      "installedCount": "インストール済みプラグイン ({{count}} 件)",
+      "empty": "プラグインがありません",
+      "emptyDescription": "インストールされたプラグインは自動的にここに表示されます",
+      "description": "以下のプラグインは Codex プラグインシステムで管理されます。チェックを外すとプラグインが無効になります。"
+    }
   },
   "mcp": {
     "title": "MCP 管理",

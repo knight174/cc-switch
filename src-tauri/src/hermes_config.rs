@@ -197,7 +197,7 @@ fn serialize_yaml_section(key: &str, value: &serde_yaml::Value) -> Result<String
 }
 
 /// Replace a YAML section in raw text, or append it if not found.
-fn replace_yaml_section(
+pub(crate) fn replace_yaml_section(
     raw: &str,
     section_key: &str,
     value: &serde_yaml::Value,
