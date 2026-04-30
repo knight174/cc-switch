@@ -1161,6 +1161,10 @@ pub fn run() {
             commands::get_hermes_installed_plugins,
             commands::apply_hermes_plugin_selection,
             commands::import_hermes_plugins_from_live,
+            // Gemini plugins
+            commands::get_gemini_installed_plugins,
+            commands::apply_gemini_plugin_selection,
+            commands::import_gemini_plugins_from_live,
             // Deep link import
             commands::parse_deeplink,
             commands::merge_deeplink_config,

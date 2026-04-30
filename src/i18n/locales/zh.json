@@ -1339,6 +1339,12 @@
       "empty": "暂无插件",
       "emptyDescription": "安装插件后将自动显示在此处",
       "description": "以下插件通过 Codex 插件系统管理。取消勾选后将禁用对应插件。"
+    },
+    "gemini": {
+      "installedCount": "已安装扩展 ({{count}} 个)",
+      "empty": "暂无扩展",
+      "emptyDescription": "安装扩展后将自动显示在此处",
+      "description": "以下扩展通过 Gemini CLI extensions 管理。取消勾选后将禁用对应扩展。"
     }
   },
   "mcp": {

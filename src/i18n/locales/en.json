@@ -1341,6 +1341,12 @@
       "empty": "No plugins",
       "emptyDescription": "Installed plugins will appear here automatically",
       "description": "These plugins are managed by the Codex plugin system. Unchecking disables the plugin."
+    },
+    "gemini": {
+      "installedCount": "Installed extensions ({{count}})",
+      "empty": "No extensions",
+      "emptyDescription": "Installed extensions will appear here automatically",
+      "description": "These extensions are managed by Gemini CLI. Unchecking disables the extension."
     }
   },
   "mcp": {

@@ -5,8 +5,9 @@ import OpencodePluginTab from "./OpencodePluginTab";
 import OpenclawPluginTab from "./OpenclawPluginTab";
 import CodexPluginTab from "./CodexPluginTab";
 import HermesPluginTab from "./HermesPluginTab";
+import GeminiPluginTab from "./GeminiPluginTab";
 
-type PluginTab = "claude" | "opencode" | "openclaw" | "codex" | "hermes";
+type PluginTab = "claude" | "opencode" | "openclaw" | "codex" | "hermes" | "gemini";
 
 export default function PluginManager() {
   const [activeTab, setActiveTab] = useState<PluginTab>("claude");
@@ -27,6 +28,13 @@ export default function PluginManager() {
           onClick={() => setActiveTab("codex")}
         >
           Codex
+        </Button>
+        <Button
+          variant={activeTab === "gemini" ? "default" : "ghost"}
+          size="sm"
+          onClick={() => setActiveTab("gemini")}
+        >
+          Gemini
         </Button>
         <Button
           variant={activeTab === "opencode" ? "default" : "ghost"}
@@ -54,6 +62,7 @@ export default function PluginManager() {
       <div className="flex-1 overflow-y-auto overflow-x-hidden pb-24">
         {activeTab === "claude" && <ClaudePluginTab />}
         {activeTab === "codex" && <CodexPluginTab />}
+        {activeTab === "gemini" && <GeminiPluginTab />}
         {activeTab === "opencode" && <OpencodePluginTab />}
         {activeTab === "openclaw" && <OpenclawPluginTab />}
         {activeTab === "hermes" && <HermesPluginTab />}
