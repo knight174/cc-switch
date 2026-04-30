@@ -1328,7 +1328,7 @@
       "installedCount": "Installed plugins ({{count}})",
       "empty": "No plugins",
       "emptyDescription": "Installed plugins will appear here automatically",
-      "description": "These plugins are managed by the Hermes plugin system. All are enabled by default; unchecking adds them to the disabled list."
+      "description": "These plugins are managed by the Hermes plugin system. Plugins are opt-in by default. Checking adds to the enabled list, unchecking adds to the disabled list."
     },
     "openclaw": {
       "installedCount": "Installed plugins ({{count}})",

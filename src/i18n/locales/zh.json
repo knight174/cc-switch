@@ -1326,7 +1326,7 @@
       "installedCount": "已安装插件 ({{count}} 个)",
       "empty": "暂无插件",
       "emptyDescription": "安装插件后将自动显示在此处",
-      "description": "以下插件通过 Hermes 插件系统管理。默认全部启用，取消勾选后将加入禁用列表。"
+      "description": "以下插件通过 Hermes 插件系统管理。默认未启用，勾选后加入启用列表，取消勾选后加入禁用列表。"
     },
     "openclaw": {
       "installedCount": "已安装插件 ({{count}} 个)",
