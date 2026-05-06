@@ -32,7 +32,6 @@ mod schema;
 mod tests;
 
 // DAO 类型导出供外部使用
-pub use dao::opencode_plugins::OpenCodePluginEntry;
 pub use dao::FailoverQueueItem;
 
 use crate::config::get_app_config_dir;

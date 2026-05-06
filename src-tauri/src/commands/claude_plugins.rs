@@ -1,10 +1,9 @@
 #![allow(non_snake_case)]
 
-use crate::app_config::AppType;
-use crate::store::AppState;
+use crate::config::{get_claude_settings_path, read_json_file, write_json_file};
 use serde::Serialize;
+use serde_json::{json, Value};
 use std::collections::HashMap;
-use tauri::State;
 
 /// 已安装的 Claude 插件信息
 #[derive(Debug, Clone, Serialize)]
@@ -15,54 +14,75 @@ pub struct ClaudeInstalledPlugin {
     pub installed_at: String,
 }
 
-/// 同步当前 Claude provider 到 live config（辅助函数）
-fn sync_claude_provider_after_plugin_change(state: &State<'_, AppState>) {
-    if let Err(e) = crate::services::provider::sync_current_provider_for_app_to_live(
-        state,
-        &AppType::Claude,
-    ) {
-        log::warn!("Failed to sync Claude provider after plugin change: {e}");
+/// 读取 ~/.claude/settings.json 的 enabledPlugins
+fn read_claude_enabled_plugins() -> Result<HashMap<String, bool>, String> {
+    let path = get_claude_settings_path();
+    if !path.exists() {
+        return Ok(HashMap::new());
     }
+
+    let json: Value = read_json_file(&path).map_err(|e| e.to_string())?;
+    let enabled = json
+        .get("enabledPlugins")
+        .and_then(|v| v.as_object())
+        .map(|obj| {
+            obj.iter()
+                .map(|(k, v)| (k.clone(), v.as_bool().unwrap_or(true)))
+                .collect()
+        })
+        .unwrap_or_default();
+
+    Ok(enabled)
 }
 
-/// 获取所有 Claude 全局插件
-#[tauri::command]
-pub fn get_claude_global_plugins(
-    state: State<'_, AppState>,
-) -> Result<HashMap<String, bool>, String> {
-    state
-        .db
-        .get_claude_global_plugins()
-        .map_err(|e| e.to_string())
-}
+/// 写入 ~/.claude/settings.json 的 enabledPlugins（保留其他字段）
+fn write_claude_enabled_plugins(enabled: &HashMap<String, bool>) -> Result<(), String> {
+    let path = get_claude_settings_path();
 
-/// 设置 Claude 全局插件（插入或更新）
-#[tauri::command]
-pub fn set_claude_global_plugin(
-    state: State<'_, AppState>,
-    pluginId: String,
-    enabled: bool,
-) -> Result<(), String> {
-    state
-        .db
-        .set_claude_global_plugin(&pluginId, enabled)
-        .map_err(|e| e.to_string())?;
-    sync_claude_provider_after_plugin_change(&state);
+    let mut settings: Value = if path.exists() {
+        read_json_file(&path).map_err(|e| e.to_string())?
+    } else {
+        json!({})
+    };
+
+    if enabled.is_empty() {
+        if let Some(obj) = settings.as_object_mut() {
+            obj.remove("enabledPlugins");
+        }
+    } else {
+        let enabled_obj: serde_json::Map<String, Value> = enabled
+            .iter()
+            .map(|(k, v)| (k.clone(), Value::Bool(*v)))
+            .collect();
+        if let Some(obj) = settings.as_object_mut() {
+            obj.insert("enabledPlugins".to_string(), Value::Object(enabled_obj));
+        }
+    }
+
+    write_json_file(&path, &settings).map_err(|e| e.to_string())?;
     Ok(())
 }
 
-/// 删除 Claude 全局插件
+/// 获取所有 Claude 全局插件（从 live config 直接读取）
 #[tauri::command]
-pub fn remove_claude_global_plugin(
-    state: State<'_, AppState>,
-    pluginId: String,
-) -> Result<(), String> {
-    state
-        .db
-        .remove_claude_global_plugin(&pluginId)
-        .map_err(|e| e.to_string())?;
-    sync_claude_provider_after_plugin_change(&state);
-    Ok(())
+pub fn get_claude_global_plugins() -> Result<HashMap<String, bool>, String> {
+    read_claude_enabled_plugins()
+}
+
+/// 设置 Claude 全局插件（直接写入 settings.json）
+#[tauri::command]
+pub fn set_claude_global_plugin(pluginId: String, enabled: bool) -> Result<(), String> {
+    let mut plugins = read_claude_enabled_plugins()?;
+    plugins.insert(pluginId, enabled);
+    write_claude_enabled_plugins(&plugins)
+}
+
+/// 删除 Claude 全局插件（直接从 settings.json 移除）
+#[tauri::command]
+pub fn remove_claude_global_plugin(pluginId: String) -> Result<(), String> {
+    let mut plugins = read_claude_enabled_plugins()?;
+    plugins.remove(&pluginId);
+    write_claude_enabled_plugins(&plugins)
 }
 
 /// 从 Claude Code 安装目录读取已安装插件列表
@@ -111,34 +131,20 @@ pub fn get_claude_installed_plugins() -> Result<Vec<ClaudeInstalledPlugin>, Stri
     Ok(result)
 }
 
-/// 批量应用 Claude 插件启用选择（从已安装列表中选择要启用的插件）
+/// 批量应用 Claude 插件启用选择（直接写入 settings.json）
 #[tauri::command]
-pub fn apply_claude_plugin_selection(
-    state: State<'_, AppState>,
-    enabledIds: Vec<String>,
-) -> Result<(), String> {
-    // 1. 清空现有全局插件表
-    let current = state
-        .db
-        .get_claude_global_plugins()
-        .map_err(|e| e.to_string())?;
-    for (id, _) in current {
-        state
-            .db
-            .remove_claude_global_plugin(&id)
-            .map_err(|e| e.to_string())?;
-    }
+pub fn apply_claude_plugin_selection(enabledIds: Vec<String>) -> Result<(), String> {
+    let installed = get_installed_claude_plugin_ids()?;
 
-    // 2. 写入新选择的插件（全部 enabled = true）
+    // 构建新的 enabledPlugins：只保留选中的已安装插件
+    let mut new_enabled: HashMap<String, bool> = HashMap::new();
     for id in enabledIds {
-        state
-            .db
-            .set_claude_global_plugin(&id, true)
-            .map_err(|e| e.to_string())?;
+        if installed.contains(&id) {
+            new_enabled.insert(id, true);
+        }
     }
 
-    sync_claude_provider_after_plugin_change(&state);
-    Ok(())
+    write_claude_enabled_plugins(&new_enabled)
 }
 
 /// 读取已安装的 Claude 插件 ID 集合（以 installed_plugins.json 为准）
@@ -164,59 +170,36 @@ pub(crate) fn get_installed_claude_plugin_ids() -> Result<std::collections::Hash
 ///
 /// 以 installed_plugins.json 为基准（管"有没有"），settings.json 的 enabledPlugins 为参考（管"开不开"）。
 /// 未安装但存在于 enabledPlugins 中的 ghost 条目会被自动清理。
+/// 返回当前启用的插件 ID 列表。
 #[tauri::command]
-pub fn import_claude_plugins_from_live(
-    state: State<'_, AppState>,
-) -> Result<Vec<String>, String> {
-    let home = dirs::home_dir().ok_or_else(|| "无法获取用户主目录".to_string())?;
-
+pub fn import_claude_plugins_from_live() -> Result<Vec<String>, String> {
     // 1. 读取已安装插件（唯一真实来源）
     let installed = get_installed_claude_plugin_ids()?;
 
-    // 2. 读取 settings.json 的 enabledPlugins（参考来源，可能不准）
-    let settings_path = home.join(".claude").join("settings.json");
-    let enabled_in_settings: HashMap<String, bool> = if settings_path.exists() {
-        let text = std::fs::read_to_string(&settings_path).map_err(|e| e.to_string())?;
-        let json: serde_json::Value = serde_json::from_str(&text).map_err(|e| e.to_string())?;
-        json.get("enabledPlugins")
-            .and_then(|v| v.as_object())
-            .map(|obj| {
-                obj.iter()
-                    .map(|(k, v)| (k.clone(), v.as_bool().unwrap_or(true)))
-                    .collect()
-            })
-            .unwrap_or_default()
-    } else {
-        HashMap::new()
-    };
+    // 2. 读取 settings.json 的 enabledPlugins
+    let mut enabled_in_settings = read_claude_enabled_plugins()?;
 
-    // 3. 清理全局表中的 ghost 条目（未安装但存在于全局表）
-    let current_global = state
-        .db
-        .get_claude_global_plugins()
-        .map_err(|e| e.to_string())?;
-    for (id, _) in &current_global {
-        if !installed.contains(id) {
-            state
-                .db
-                .remove_claude_global_plugin(id)
-                .map_err(|e| e.to_string())?;
-        }
+    // 3. 清理 ghost 条目（未安装但存在于 enabledPlugins 中）
+    let ghost_ids: Vec<String> = enabled_in_settings
+        .keys()
+        .filter(|id| !installed.contains(*id))
+        .cloned()
+        .collect();
+    for id in &ghost_ids {
+        enabled_in_settings.remove(id);
     }
 
-    // 4. 只导入已安装的插件
-    let mut imported = Vec::new();
-    for plugin_id in &installed {
-        let enabled = enabled_in_settings.get(plugin_id).copied().unwrap_or(false);
-        state
-            .db
-            .set_claude_global_plugin(plugin_id, enabled)
-            .map_err(|e| e.to_string())?;
-        if enabled {
-            imported.push(plugin_id.clone());
-        }
+    // 4. 写回清理后的 enabledPlugins
+    if !ghost_ids.is_empty() {
+        write_claude_enabled_plugins(&enabled_in_settings)?;
     }
 
-    sync_claude_provider_after_plugin_change(&state);
-    Ok(imported)
+    // 5. 返回当前启用的插件 ID 列表
+    let enabled_ids: Vec<String> = enabled_in_settings
+        .into_iter()
+        .filter(|(_, enabled)| *enabled)
+        .map(|(id, _)| id)
+        .collect();
+
+    Ok(enabled_ids)
 }
