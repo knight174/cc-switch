@@ -499,17 +499,6 @@ pub(crate) fn build_effective_settings_with_common_config(
         }
     }
 
-    // 合并 Claude 全局插件到生效配置
-    if *app_type == AppType::Claude {
-        if let Err(e) = apply_global_plugins_to_claude_settings(db, &mut effective_settings) {
-            log::warn!(
-                "Failed to apply global plugins for {} provider '{}': {e}",
-                app_type.as_str(),
-                provider.id
-            );
-        }
-    }
-
     Ok(effective_settings)
 }
 
@@ -523,107 +512,6 @@ pub(crate) fn write_live_with_common_config(
         build_effective_settings_with_common_config(db, app_type, provider)?;
 
     write_live_snapshot(app_type, &effective_provider)
-}
-
-/// 读取已安装的 Claude 插件 ID 集合（以 installed_plugins.json 为准）
-fn get_installed_claude_plugin_ids() -> Result<std::collections::HashSet<String>, AppError> {
-    let home = dirs::home_dir().ok_or_else(|| AppError::Config("无法获取用户主目录".to_string()))?;
-    let path = home.join(".claude").join("plugins").join("installed_plugins.json");
-
-    if !path.exists() {
-        return Ok(std::collections::HashSet::new());
-    }
-
-    let text = std::fs::read_to_string(&path).map_err(|e| AppError::Config(e.to_string()))?;
-    let json: Value = serde_json::from_str(&text).map_err(|e| AppError::Config(e.to_string()))?;
-
-    let Some(plugins_obj) = json.get("plugins").and_then(|v| v.as_object()) else {
-        return Ok(std::collections::HashSet::new());
-    };
-
-    Ok(plugins_obj.keys().cloned().collect())
-}
-
-/// 将 Claude 全局插件合并到 provider settings 的 enabledPlugins 中
-///
-/// 合并策略：全局插件作为默认值，provider 显式设置的键覆盖全局默认值。
-/// 只合并实际已安装的插件，避免 ghost 条目污染 settings.json。
-pub(crate) fn apply_global_plugins_to_claude_settings(
-    db: &Database,
-    settings: &mut Value,
-) -> Result<(), AppError> {
-    let global = db.get_claude_global_plugins()?;
-    if global.is_empty() {
-        return Ok(());
-    }
-
-    // 过滤：只保留已安装的插件
-    let installed = get_installed_claude_plugin_ids()?;
-    let active_global: HashMap<String, bool> = global
-        .into_iter()
-        .filter(|(id, _)| installed.contains(id))
-        .collect();
-
-    if active_global.is_empty() {
-        return Ok(());
-    }
-
-    let Some(obj) = settings.as_object_mut() else {
-        return Ok(());
-    };
-
-    let mut merged = obj
-        .get("enabledPlugins")
-        .and_then(|v| v.as_object().cloned())
-        .unwrap_or_default();
-
-    for (id, enabled) in active_global {
-        merged.entry(id).or_insert(Value::Bool(enabled));
-    }
-
-    obj.insert(
-        "enabledPlugins".to_string(),
-        Value::Object(merged.into_iter().collect()),
-    );
-    Ok(())
-}
-
-/// 从 Claude live settings 中剥离全局插件
-///
-/// 剥离规则：如果 live 中的插件键值与全局默认值完全相同，说明是全局插件注入的，移除；
-/// 如果值不同，说明 provider 有自定义覆盖，保留。
-pub(crate) fn strip_global_plugins_from_claude_settings(
-    db: &Database,
-    live_settings: &Value,
-) -> Result<Value, AppError> {
-    let global = db.get_claude_global_plugins()?;
-    if global.is_empty() {
-        return Ok(live_settings.clone());
-    }
-
-    let mut result = live_settings.clone();
-    let Some(enabled_plugins) = result
-        .get_mut("enabledPlugins")
-        .and_then(|v| v.as_object_mut())
-    else {
-        return Ok(result);
-    };
-
-    for (global_id, global_value) in &global {
-        if let Some(live_value) = enabled_plugins.get(global_id) {
-            if live_value == &Value::Bool(*global_value) {
-                enabled_plugins.remove(global_id);
-            }
-        }
-    }
-
-    if enabled_plugins.is_empty() {
-        if let Some(root) = result.as_object_mut() {
-            root.remove("enabledPlugins");
-        }
-    }
-
-    Ok(result)
 }
 
 pub(crate) fn strip_common_config_from_live_settings(
@@ -780,7 +668,19 @@ pub(crate) fn write_live_snapshot(app_type: &AppType, provider: &Provider) -> Re
     match app_type {
         AppType::Claude => {
             let path = get_claude_settings_path();
-            let settings = sanitize_claude_settings_for_live(&provider.settings_config);
+            let mut settings = sanitize_claude_settings_for_live(&provider.settings_config);
+
+            // Preserve existing enabledPlugins from live config (plugin management is direct-live-config)
+            if path.exists() {
+                if let Ok(live_settings) = read_json_file::<Value>(&path) {
+                    if let Some(enabled_plugins) = live_settings.get("enabledPlugins") {
+                        if let Some(obj) = settings.as_object_mut() {
+                            obj.insert("enabledPlugins".to_string(), enabled_plugins.clone());
+                        }
+                    }
+                }
+            }
+
             write_json_file(&path, &settings)?;
         }
         AppType::Codex => {
@@ -798,7 +698,29 @@ pub(crate) fn write_live_snapshot(app_type: &AppType, provider: &Provider) -> Re
             let auth_path = get_codex_auth_path();
             write_json_file(&auth_path, auth)?;
             let config_path = get_codex_config_path();
-            std::fs::write(&config_path, config_str).map_err(|e| AppError::io(&config_path, e))?;
+
+            // 解析 provider config 为 TOML,并合并当前 live 中的 [plugins]
+            // 避免 provider sync 覆盖用户通过 PluginManager 修改的插件选择
+            let config_to_write = match config_str.parse::<DocumentMut>() {
+                Ok(mut doc) => {
+                    if config_path.exists() {
+                        if let Ok(live_text) = std::fs::read_to_string(&config_path) {
+                            if let Ok(live_doc) = live_text.parse::<DocumentMut>() {
+                                if let Some(plugins) = live_doc.get("plugins") {
+                                    doc["plugins"] = plugins.clone();
+                                }
+                            }
+                        }
+                    }
+                    doc.to_string()
+                }
+                Err(e) => {
+                    log::warn!("Failed to parse Codex config.toml for merge, writing raw: {e}");
+                    config_str.to_string()
+                }
+            };
+
+            std::fs::write(&config_path, config_to_write).map_err(|e| AppError::io(&config_path, e))?;
         }
         AppType::Gemini => {
             // Delegate to write_gemini_live which handles env file writing correctly
@@ -942,18 +864,6 @@ fn sync_all_providers_to_live(state: &AppState, app_type: &AppType) -> Result<()
     }
 
     log::info!("Synced {synced_count} {app_type:?} providers to live config");
-
-    // 同步 OpenCode 插件（Additive Mode，与 Provider 独立）
-    if *app_type == AppType::OpenCode {
-        match state.db.get_opencode_plugin_names() {
-            Ok(names) => {
-                if let Err(e) = crate::opencode_config::sync_opencode_plugins(&names) {
-                    log::warn!("Failed to sync OpenCode plugins to live: {e}");
-                }
-            }
-            Err(e) => log::warn!("Failed to read OpenCode plugins from db: {e}"),
-        }
-    }
 
     Ok(())
 }
