@@ -1,7 +1,9 @@
 #![allow(non_snake_case)]
 
 use crate::codex_config::{get_codex_config_path, read_codex_config_text};
+use crate::config::{get_home_dir, read_json_file};
 use serde::Serialize;
+use std::collections::HashMap;
 use std::collections::HashSet;
 
 /// Codex 已安装插件信息
@@ -11,34 +13,82 @@ pub struct CodexInstalledPlugin {
     pub enabled: bool,
 }
 
-/// 读取 Codex 已安装插件列表（从 config.toml 的 [plugins."id"]）
+/// 读取 Codex marketplace.json 中的插件 ID 列表
+///
+/// marketplace.json 格式：
+/// ```json
+/// {
+///   "plugins": [
+///     { "name": "plugin-eval", ... }
+///   ]
+/// }
+/// ```
+fn read_marketplace_plugins() -> Vec<String> {
+    let path = get_home_dir()
+        .join(".agents")
+        .join("plugins")
+        .join("marketplace.json");
+    if !path.exists() {
+        return Vec::new();
+    }
+
+    let json: serde_json::Value = match read_json_file(&path) {
+        Ok(v) => v,
+        Err(_) => return Vec::new(),
+    };
+
+    let mut plugins = Vec::new();
+    if let Some(plugins_arr) = json.get("plugins").and_then(|v| v.as_array()) {
+        for plugin in plugins_arr {
+            if let Some(name) = plugin.get("name").and_then(|v| v.as_str()) {
+                plugins.push(name.to_string());
+            }
+        }
+    }
+
+    plugins
+}
+
+/// 读取 Codex 已安装插件列表
+///
+/// 合并两个来源：
+/// 1. config.toml 的 `[plugins."id"]` —— 权威启用状态来源
+/// 2. marketplace.json 的 `plugins[].name` —— 补充 config.toml 中未列出的插件
+///
+/// 若插件只在 marketplace.json 中存在，默认视为启用（true）。
 #[tauri::command]
 pub fn get_codex_installed_plugins() -> Result<Vec<CodexInstalledPlugin>, String> {
     let path = get_codex_config_path();
-    if !path.exists() {
-        return Ok(Vec::new());
-    }
 
-    let text = read_codex_config_text().map_err(|e| e.to_string())?;
-    if text.trim().is_empty() {
-        return Ok(Vec::new());
-    }
-
-    let doc: toml::Table = toml::from_str(&text).map_err(|e| e.to_string())?;
-
-    let mut plugins = Vec::new();
-    if let Some(plugins_table) = doc.get("plugins").and_then(|v| v.as_table()) {
-        for (plugin_id, value) in plugins_table {
-            let enabled = value
-                .get("enabled")
-                .and_then(|v| v.as_bool())
-                .unwrap_or(true);
-            plugins.push(CodexInstalledPlugin {
-                id: plugin_id.clone(),
-                enabled,
-            });
+    // 1. 读取 config.toml 的 [plugins]
+    let mut plugins_map: HashMap<String, bool> = HashMap::new();
+    if path.exists() {
+        let text = read_codex_config_text().map_err(|e| e.to_string())?;
+        if !text.trim().is_empty() {
+            let doc: toml::Table = toml::from_str(&text).map_err(|e| e.to_string())?;
+            if let Some(plugins_table) = doc.get("plugins").and_then(|v| v.as_table()) {
+                for (plugin_id, value) in plugins_table {
+                    let enabled = value
+                        .get("enabled")
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(true);
+                    plugins_map.insert(plugin_id.clone(), enabled);
+                }
+            }
         }
     }
+
+    // 2. 读取 marketplace.json，补充 config.toml 中不存在的插件
+    let marketplace_plugins = read_marketplace_plugins();
+    for plugin_id in marketplace_plugins {
+        plugins_map.entry(plugin_id).or_insert(true);
+    }
+
+    // 3. 构建返回列表
+    let mut plugins: Vec<CodexInstalledPlugin> = plugins_map
+        .into_iter()
+        .map(|(id, enabled)| CodexInstalledPlugin { id, enabled })
+        .collect();
 
     plugins.sort_by(|a, b| a.id.cmp(&b.id));
     Ok(plugins)
@@ -80,33 +130,16 @@ pub fn apply_codex_plugin_selection(enabledIds: Vec<String>) -> Result<(), Strin
     Ok(())
 }
 
-/// 从现有 Codex config.toml 导入插件
+/// 从现有 Codex 配置导入插件
+///
+/// 复用 get_codex_installed_plugins() 的合并逻辑，返回当前启用的插件 ID 列表。
 #[tauri::command]
 pub fn import_codex_plugins_from_live() -> Result<Vec<String>, String> {
-    let path = get_codex_config_path();
-    if !path.exists() {
-        return Ok(Vec::new());
-    }
-
-    let text = read_codex_config_text().map_err(|e| e.to_string())?;
-    if text.trim().is_empty() {
-        return Ok(Vec::new());
-    }
-
-    let doc: toml::Table = toml::from_str(&text).map_err(|e| e.to_string())?;
-
-    let mut imported = Vec::new();
-    if let Some(plugins_table) = doc.get("plugins").and_then(|v| v.as_table()) {
-        for (plugin_id, value) in plugins_table {
-            let enabled = value
-                .get("enabled")
-                .and_then(|v| v.as_bool())
-                .unwrap_or(true);
-            if enabled {
-                imported.push(plugin_id.clone());
-            }
-        }
-    }
-
-    Ok(imported)
+    let plugins = get_codex_installed_plugins()?;
+    let enabled: Vec<String> = plugins
+        .into_iter()
+        .filter(|p| p.enabled)
+        .map(|p| p.id)
+        .collect();
+    Ok(enabled)
 }
