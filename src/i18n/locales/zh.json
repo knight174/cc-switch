@@ -1313,38 +1313,32 @@
       "installedCount": "已安装插件 ({{count}} 个)",
       "addPlaceholder": "例如: superpowers@superpowers-marketplace",
       "empty": "暂无插件",
-      "emptyDescription": "安装插件后将自动显示在此处",
-      "description": "以下插件对所有 Claude 供应商默认启用，单个供应商的设置可覆盖此默认值。"
+      "emptyDescription": "安装插件后将自动显示在此处"
     },
     "opencode": {
       "addPlaceholder": "例如: oh-my-openagent",
       "empty": "暂无插件",
-      "emptyDescription": "添加插件后将自动显示在此处",
-      "description": "以下插件直接写入 opencode.json，与供应商配置相互独立。"
+      "emptyDescription": "添加插件后将自动显示在此处"
     },
     "hermes": {
       "installedCount": "已安装插件 ({{count}} 个)",
       "empty": "暂无插件",
-      "emptyDescription": "安装插件后将自动显示在此处",
-      "description": "以下插件通过 Hermes 插件系统管理。默认未启用，勾选后加入启用列表，取消勾选后加入禁用列表。"
+      "emptyDescription": "安装插件后将自动显示在此处"
     },
     "openclaw": {
       "installedCount": "已安装插件 ({{count}} 个)",
       "empty": "暂无插件",
-      "emptyDescription": "安装插件后将自动显示在此处",
-      "description": "以下插件通过 OpenClaw 插件系统管理。取消勾选后将禁用对应插件。"
+      "emptyDescription": "安装插件后将自动显示在此处"
     },
     "codex": {
       "installedCount": "已安装插件 ({{count}} 个)",
       "empty": "暂无插件",
-      "emptyDescription": "安装插件后将自动显示在此处",
-      "description": "以下插件通过 Codex 插件系统管理。取消勾选后将禁用对应插件。"
+      "emptyDescription": "安装插件后将自动显示在此处"
     },
     "gemini": {
       "installedCount": "已安装扩展 ({{count}} 个)",
       "empty": "暂无扩展",
-      "emptyDescription": "安装扩展后将自动显示在此处",
-      "description": "以下扩展通过 Gemini CLI extensions 管理。取消勾选后将禁用对应扩展。"
+      "emptyDescription": "安装扩展后将自动显示在此处"
     }
   },
   "mcp": {

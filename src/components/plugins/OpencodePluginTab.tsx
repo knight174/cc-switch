@@ -71,9 +71,6 @@ export default function OpencodePluginTab() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="text-sm text-muted-foreground">
-        {t("plugins.opencode.description")}
-      </div>
       <div className="flex items-center gap-2">
         <Input
           placeholder={t("plugins.opencode.addPlaceholder")}

@@ -68,9 +68,6 @@ export default function CheckboxPluginTab<T extends PluginItem>(
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="text-sm text-muted-foreground">
-        {t(`plugins.${providerKey}.description`)}
-      </div>
       <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground">
           {t(`plugins.${providerKey}.installedCount`, {

@@ -37,6 +37,10 @@ pub fn get_openclaw_installed_plugins() -> Result<Vec<OpenClawInstalledPlugin>, 
 }
 
 /// 批量应用 OpenClaw 插件启用选择
+///
+/// 勾选逻辑：用户勾选 → 将 `plugins.entries.<id>.enabled` 设为 true。
+/// 取消勾选 → 将同一字段设为 false。
+/// 仅修改已存在于 plugins.entries 中的插件，不会新增或删除条目。
 #[tauri::command]
 pub fn apply_openclaw_plugin_selection(
     enabledIds: Vec<String>,

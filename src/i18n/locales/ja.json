@@ -1315,38 +1315,32 @@
       "installedCount": "インストール済みプラグイン ({{count}} 件)",
       "addPlaceholder": "例: superpowers@superpowers-marketplace",
       "empty": "プラグインがありません",
-      "emptyDescription": "インストールされたプラグインは自動的にここに表示されます",
-      "description": "以下のプラグインはすべての Claude プロバイダーでデフォルトで有効になります。個別のプロバイダー設定で上書き可能です。"
+      "emptyDescription": "インストールされたプラグインは自動的にここに表示されます"
     },
     "opencode": {
       "addPlaceholder": "例: oh-my-openagent",
       "empty": "プラグインがありません",
-      "emptyDescription": "追加されたプラグインは自動的にここに表示されます",
-      "description": "以下のプラグインは opencode.json に直接書き込まれ、プロバイダー設定とは独立しています。"
+      "emptyDescription": "追加されたプラグインは自動的にここに表示されます"
     },
     "hermes": {
       "installedCount": "インストール済みプラグイン ({{count}} 件)",
       "empty": "プラグインがありません",
-      "emptyDescription": "インストールされたプラグインは自動的にここに表示されます",
-      "description": "以下のプラグインは Hermes プラグインシステムで管理されます。デフォルトで未启用です。チェックを入れると有効リストに追加され、外すと無効リストに追加されます。"
+      "emptyDescription": "インストールされたプラグインは自動的にここに表示されます"
     },
     "openclaw": {
       "installedCount": "インストール済みプラグイン ({{count}} 件)",
       "empty": "プラグインがありません",
-      "emptyDescription": "インストールされたプラグインは自動的にここに表示されます",
-      "description": "以下のプラグインは OpenClaw プラグインシステムで管理されます。チェックを外すとプラグインが無効になります。"
+      "emptyDescription": "インストールされたプラグインは自動的にここに表示されます"
     },
     "codex": {
       "installedCount": "インストール済みプラグイン ({{count}} 件)",
       "empty": "プラグインがありません",
-      "emptyDescription": "インストールされたプラグインは自動的にここに表示されます",
-      "description": "以下のプラグインは Codex プラグインシステムで管理されます。チェックを外すとプラグインが無効になります。"
+      "emptyDescription": "インストールされたプラグインは自動的にここに表示されます"
     },
     "gemini": {
       "installedCount": "インストール済み拡張機能 ({{count}} 件)",
       "empty": "拡張機能がありません",
-      "emptyDescription": "インストールされた拡張機能は自動的にここに表示されます",
-      "description": "以下の拡張機能は Gemini CLI で管理されます。チェックを外すと拡張機能が無効になります。"
+      "emptyDescription": "インストールされた拡張機能は自動的にここに表示されます"
     }
   },
   "mcp": {

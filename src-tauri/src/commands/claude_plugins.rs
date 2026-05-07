@@ -132,6 +132,10 @@ pub fn get_claude_installed_plugins() -> Result<Vec<ClaudeInstalledPlugin>, Stri
 }
 
 /// 批量应用 Claude 插件启用选择（直接写入 settings.json）
+///
+/// 勾选逻辑：用户勾选 → 将插件 ID 以 `{id: true}` 形式写入 settings.json 的 enabledPlugins。
+/// 取消勾选 → 从 enabledPlugins 中移除该插件 ID（不写 false，直接移除）。
+/// 只保留已安装插件（以 installed_plugins.json 为准），未安装但被勾选的 ID 会被过滤掉。
 #[tauri::command]
 pub fn apply_claude_plugin_selection(enabledIds: Vec<String>) -> Result<(), String> {
     let installed = get_installed_claude_plugin_ids()?;

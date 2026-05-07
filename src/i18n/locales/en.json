@@ -1315,38 +1315,32 @@
       "installedCount": "Installed plugins ({{count}})",
       "addPlaceholder": "e.g. superpowers@superpowers-marketplace",
       "empty": "No plugins",
-      "emptyDescription": "Installed plugins will appear here automatically",
-      "description": "These plugins are enabled globally for all Claude providers. Individual provider settings can override them."
+      "emptyDescription": "Installed plugins will appear here automatically"
     },
     "opencode": {
       "addPlaceholder": "e.g. oh-my-openagent",
       "empty": "No plugins",
-      "emptyDescription": "Added plugins will appear here automatically",
-      "description": "These plugins are written directly to opencode.json, independent of provider configuration."
+      "emptyDescription": "Added plugins will appear here automatically"
     },
     "hermes": {
       "installedCount": "Installed plugins ({{count}})",
       "empty": "No plugins",
-      "emptyDescription": "Installed plugins will appear here automatically",
-      "description": "These plugins are managed by the Hermes plugin system. Plugins are opt-in by default. Checking adds to the enabled list, unchecking adds to the disabled list."
+      "emptyDescription": "Installed plugins will appear here automatically"
     },
     "openclaw": {
       "installedCount": "Installed plugins ({{count}})",
       "empty": "No plugins",
-      "emptyDescription": "Installed plugins will appear here automatically",
-      "description": "These plugins are managed by the OpenClaw plugin system. Unchecking disables the plugin."
+      "emptyDescription": "Installed plugins will appear here automatically"
     },
     "codex": {
       "installedCount": "Installed plugins ({{count}})",
       "empty": "No plugins",
-      "emptyDescription": "Installed plugins will appear here automatically",
-      "description": "These plugins are managed by the Codex plugin system. Unchecking disables the plugin."
+      "emptyDescription": "Installed plugins will appear here automatically"
     },
     "gemini": {
       "installedCount": "Installed extensions ({{count}})",
       "empty": "No extensions",
-      "emptyDescription": "Installed extensions will appear here automatically",
-      "description": "These extensions are managed by Gemini CLI. Unchecking disables the extension."
+      "emptyDescription": "Installed extensions will appear here automatically"
     }
   },
   "mcp": {

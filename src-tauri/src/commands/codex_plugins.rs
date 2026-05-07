@@ -45,6 +45,10 @@ pub fn get_codex_installed_plugins() -> Result<Vec<CodexInstalledPlugin>, String
 }
 
 /// 批量应用 Codex 插件启用选择
+///
+/// 勾选逻辑：用户勾选 → 将 `[plugins."id"] enabled = true` 写入 config.toml。
+/// 取消勾选 → 将同一 table 的 enabled 设为 false。
+/// 仅修改已存在于 config.toml [plugins] 下的插件，不会新增或删除插件条目。
 #[tauri::command]
 pub fn apply_codex_plugin_selection(enabledIds: Vec<String>) -> Result<(), String> {
     let path = get_codex_config_path();
