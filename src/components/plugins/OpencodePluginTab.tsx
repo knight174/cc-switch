@@ -79,11 +79,11 @@ export default function OpencodePluginTab() {
           onKeyDown={(e) => e.key === "Enter" && handleAdd()}
           className="flex-1"
         />
-        <Button onClick={handleAdd} disabled={!newPlugin.trim()}>
+        <Button size="sm" onClick={handleAdd} disabled={!newPlugin.trim()}>
           <Plus className="w-4 h-4 mr-1" />
           {t("common.add")}
         </Button>
-        <Button variant="outline" onClick={handleImport}>
+        <Button size="sm" variant="outline" onClick={handleImport}>
           <Download className="w-4 h-4 mr-1" />
           {t("plugins.import")}
         </Button>
