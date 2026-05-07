@@ -1311,10 +1311,13 @@
     "title": "プラグイン管理",
     "import": "インポート",
     "importSuccess": "{{count}} 件のプラグインをインポートしました",
+    "applyFailed": "プラグインの適用に失敗しました",
+    "importFailed": "プラグインのインポートに失敗しました",
     "claude": {
       "installedCount": "インストール済みプラグイン ({{count}} 件)",
       "addPlaceholder": "例: superpowers@superpowers-marketplace",
       "empty": "プラグインがありません",
+
       "emptyDescription": "インストールされたプラグインは自動的にここに表示されます"
     },
     "opencode": {

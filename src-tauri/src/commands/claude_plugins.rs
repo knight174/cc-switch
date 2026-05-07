@@ -88,7 +88,7 @@ pub fn remove_claude_global_plugin(pluginId: String) -> Result<(), String> {
 /// 从 Claude Code 安装目录读取已安装插件列表
 #[tauri::command]
 pub fn get_claude_installed_plugins() -> Result<Vec<ClaudeInstalledPlugin>, String> {
-    let home = dirs::home_dir().ok_or_else(|| "无法获取用户主目录".to_string())?;
+    let home = dirs::home_dir().ok_or_else(|| "Failed to get user home directory".to_string())?;
     let path = home.join(".claude").join("plugins").join("installed_plugins.json");
 
     if !path.exists() {
@@ -153,7 +153,7 @@ pub fn apply_claude_plugin_selection(enabledIds: Vec<String>) -> Result<(), Stri
 
 /// 读取已安装的 Claude 插件 ID 集合（以 installed_plugins.json 为准）
 pub(crate) fn get_installed_claude_plugin_ids() -> Result<std::collections::HashSet<String>, String> {
-    let home = dirs::home_dir().ok_or_else(|| "无法获取用户主目录".to_string())?;
+    let home = dirs::home_dir().ok_or_else(|| "Failed to get user home directory".to_string())?;
     let path = home.join(".claude").join("plugins").join("installed_plugins.json");
 
     if !path.exists() {

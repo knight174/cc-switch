@@ -31,7 +31,7 @@ export default function OpencodePluginTab() {
       setNewPlugin("");
       toast.success(t("common.success"));
     } catch (error) {
-      toast.error(t("common.error"), { description: extractErrorMessage(error) });
+      toast.error(t("plugins.applyFailed"), { description: extractErrorMessage(error) });
     }
   };
 
@@ -40,7 +40,7 @@ export default function OpencodePluginTab() {
       await removePlugin.mutateAsync(normalizedName);
       toast.success(t("common.success"));
     } catch (error) {
-      toast.error(t("common.error"), { description: extractErrorMessage(error) });
+      toast.error(t("plugins.applyFailed"), { description: extractErrorMessage(error) });
     }
   };
 
@@ -56,7 +56,7 @@ export default function OpencodePluginTab() {
     try {
       await reorderPlugins.mutateAsync(newOrder.map((p) => p.normalized_name));
     } catch (error) {
-      toast.error(t("common.error"), { description: extractErrorMessage(error) });
+      toast.error(t("plugins.applyFailed"), { description: extractErrorMessage(error) });
     }
   };
 
@@ -65,7 +65,7 @@ export default function OpencodePluginTab() {
       const imported = await importPlugins.mutateAsync();
       toast.success(t("plugins.importSuccess", { count: imported.length }));
     } catch (error) {
-      toast.error(t("common.error"), { description: extractErrorMessage(error) });
+      toast.error(t("plugins.importFailed"), { description: extractErrorMessage(error) });
     }
   };
 

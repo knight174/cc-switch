@@ -1309,6 +1309,8 @@
     "title": "插件管理",
     "import": "导入",
     "importSuccess": "已导入 {{count}} 个插件",
+    "applyFailed": "Apply 失败",
+    "importFailed": "导入失败",
     "claude": {
       "installedCount": "已安装插件 ({{count}} 个)",
       "addPlaceholder": "例如: superpowers@superpowers-marketplace",

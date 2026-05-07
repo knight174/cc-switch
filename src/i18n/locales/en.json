@@ -1311,6 +1311,8 @@
     "title": "Plugin Management",
     "import": "Import",
     "importSuccess": "Imported {{count}} plugins",
+    "applyFailed": "Failed to apply plugin selection",
+    "importFailed": "Failed to import plugins",
     "claude": {
       "installedCount": "Installed plugins ({{count}})",
       "addPlaceholder": "e.g. superpowers@superpowers-marketplace",

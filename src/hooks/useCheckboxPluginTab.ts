@@ -70,7 +70,7 @@ export function useCheckboxPluginTab(options: UseCheckboxPluginTabOptions) {
       setPendingSelection(new Set());
       toast.success(t("common.success"));
     } catch (error) {
-      toast.error(t("common.error"), {
+      toast.error(t("plugins.applyFailed"), {
         description: extractErrorMessage(error),
       });
     }
@@ -81,7 +81,7 @@ export function useCheckboxPluginTab(options: UseCheckboxPluginTabOptions) {
       const imported = await importMutation.mutateAsync();
       toast.success(t("plugins.importSuccess", { count: imported.length }));
     } catch (error) {
-      toast.error(t("common.error"), {
+      toast.error(t("plugins.importFailed"), {
         description: extractErrorMessage(error),
       });
     }
