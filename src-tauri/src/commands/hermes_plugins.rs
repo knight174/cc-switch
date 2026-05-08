@@ -25,7 +25,7 @@ pub fn get_hermes_installed_plugins() -> Result<Vec<HermesInstalledPlugin>, Stri
     let enabled: HashSet<String> = config
         .get("plugins")
         .and_then(|v| v.as_mapping())
-        .and_then(|m| m.get(&serde_yaml::Value::String("enabled".to_string())))
+        .and_then(|m| m.get(serde_yaml::Value::String("enabled".to_string())))
         .and_then(|v| v.as_sequence())
         .map(|seq| {
             seq.iter()
@@ -38,7 +38,7 @@ pub fn get_hermes_installed_plugins() -> Result<Vec<HermesInstalledPlugin>, Stri
     let disabled: HashSet<String> = config
         .get("plugins")
         .and_then(|v| v.as_mapping())
-        .and_then(|m| m.get(&serde_yaml::Value::String("disabled".to_string())))
+        .and_then(|m| m.get(serde_yaml::Value::String("disabled".to_string())))
         .and_then(|v| v.as_sequence())
         .map(|seq| {
             seq.iter()
@@ -114,7 +114,7 @@ pub fn apply_hermes_plugin_selection(enabledIds: Vec<String>) -> Result<(), Stri
     let new_disabled: Vec<serde_yaml::Value> = all_installed
         .into_iter()
         .filter(|id| !enabled_set.contains(id))
-        .map(|id| serde_yaml::Value::String(id))
+        .map(serde_yaml::Value::String)
         .collect();
 
     // 构建 plugins section
@@ -125,7 +125,7 @@ pub fn apply_hermes_plugin_selection(enabledIds: Vec<String>) -> Result<(), Stri
         .unwrap_or_default();
 
     if new_enabled.is_empty() {
-        plugins_mapping.remove(&serde_yaml::Value::String("enabled".to_string()));
+        plugins_mapping.remove(serde_yaml::Value::String("enabled".to_string()));
     } else {
         plugins_mapping.insert(
             serde_yaml::Value::String("enabled".to_string()),
@@ -134,7 +134,7 @@ pub fn apply_hermes_plugin_selection(enabledIds: Vec<String>) -> Result<(), Stri
     }
 
     if new_disabled.is_empty() {
-        plugins_mapping.remove(&serde_yaml::Value::String("disabled".to_string()));
+        plugins_mapping.remove(serde_yaml::Value::String("disabled".to_string()));
     } else {
         plugins_mapping.insert(
             serde_yaml::Value::String("disabled".to_string()),
@@ -161,7 +161,7 @@ pub fn import_hermes_plugins_from_live() -> Result<Vec<String>, String> {
     let enabled: Vec<String> = config
         .get("plugins")
         .and_then(|v| v.as_mapping())
-        .and_then(|m| m.get(&serde_yaml::Value::String("enabled".to_string())))
+        .and_then(|m| m.get(serde_yaml::Value::String("enabled".to_string())))
         .and_then(|v| v.as_sequence())
         .map(|seq| {
             seq.iter()

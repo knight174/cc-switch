@@ -14,7 +14,9 @@ export function useApplyOpenclawPluginSelection() {
     mutationFn: (enabledIds: string[]) =>
       openclawPluginsApi.applySelection(enabledIds),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["openclawPlugins", "installed"] });
+      queryClient.invalidateQueries({
+        queryKey: ["openclawPlugins", "installed"],
+      });
     },
   });
 }
@@ -24,7 +26,9 @@ export function useImportOpenclawPlugins() {
   return useMutation({
     mutationFn: () => openclawPluginsApi.importFromLive(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["openclawPlugins", "installed"] });
+      queryClient.invalidateQueries({
+        queryKey: ["openclawPlugins", "installed"],
+      });
     },
   });
 }

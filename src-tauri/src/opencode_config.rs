@@ -231,4 +231,3 @@ pub fn remove_plugins_by_prefixes(prefixes: &[&str]) -> Result<(), AppError> {
 
     write_opencode_config(&config)
 }
-

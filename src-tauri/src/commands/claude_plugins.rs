@@ -89,7 +89,10 @@ pub fn remove_claude_global_plugin(pluginId: String) -> Result<(), String> {
 #[tauri::command]
 pub fn get_claude_installed_plugins() -> Result<Vec<ClaudeInstalledPlugin>, String> {
     let home = dirs::home_dir().ok_or_else(|| "Failed to get user home directory".to_string())?;
-    let path = home.join(".claude").join("plugins").join("installed_plugins.json");
+    let path = home
+        .join(".claude")
+        .join("plugins")
+        .join("installed_plugins.json");
 
     if !path.exists() {
         return Ok(Vec::new());
@@ -104,9 +107,13 @@ pub fn get_claude_installed_plugins() -> Result<Vec<ClaudeInstalledPlugin>, Stri
 
     let mut result = Vec::new();
     for (plugin_id, entries) in plugins_obj {
-        let Some(arr) = entries.as_array() else { continue };
+        let Some(arr) = entries.as_array() else {
+            continue;
+        };
         let Some(first) = arr.first() else { continue };
-        let Some(entry) = first.as_object() else { continue };
+        let Some(entry) = first.as_object() else {
+            continue;
+        };
 
         result.push(ClaudeInstalledPlugin {
             id: plugin_id.clone(),
@@ -152,9 +159,13 @@ pub fn apply_claude_plugin_selection(enabledIds: Vec<String>) -> Result<(), Stri
 }
 
 /// 读取已安装的 Claude 插件 ID 集合（以 installed_plugins.json 为准）
-pub(crate) fn get_installed_claude_plugin_ids() -> Result<std::collections::HashSet<String>, String> {
+pub(crate) fn get_installed_claude_plugin_ids() -> Result<std::collections::HashSet<String>, String>
+{
     let home = dirs::home_dir().ok_or_else(|| "Failed to get user home directory".to_string())?;
-    let path = home.join(".claude").join("plugins").join("installed_plugins.json");
+    let path = home
+        .join(".claude")
+        .join("plugins")
+        .join("installed_plugins.json");
 
     if !path.exists() {
         return Ok(std::collections::HashSet::new());

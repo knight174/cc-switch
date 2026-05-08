@@ -14,7 +14,9 @@ export function useApplyCodexPluginSelection() {
     mutationFn: (enabledIds: string[]) =>
       codexPluginsApi.applySelection(enabledIds),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["codexPlugins", "installed"] });
+      queryClient.invalidateQueries({
+        queryKey: ["codexPlugins", "installed"],
+      });
     },
   });
 }
@@ -24,7 +26,9 @@ export function useImportCodexPlugins() {
   return useMutation({
     mutationFn: () => codexPluginsApi.importFromLive(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["codexPlugins", "installed"] });
+      queryClient.invalidateQueries({
+        queryKey: ["codexPlugins", "installed"],
+      });
     },
   });
 }

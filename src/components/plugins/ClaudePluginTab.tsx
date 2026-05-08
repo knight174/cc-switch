@@ -25,14 +25,21 @@ export default function ClaudePluginTab() {
     );
   }, [globalPlugins]);
 
-  const { selectedIds, hasChanges, isApplying, isImporting, handleToggle, handleApply, handleImport } =
-    useCheckboxPluginTab({
-      installedPlugins,
-      isLoading: globalLoading || installedLoading,
-      initialEnabledIds,
-      applyMutation,
-      importMutation,
-    });
+  const {
+    selectedIds,
+    hasChanges,
+    isApplying,
+    isImporting,
+    handleToggle,
+    handleApply,
+    handleImport,
+  } = useCheckboxPluginTab({
+    installedPlugins,
+    isLoading: globalLoading || installedLoading,
+    initialEnabledIds,
+    applyMutation,
+    importMutation,
+  });
 
   return (
     <CheckboxPluginTab<ClaudeInstalledPlugin>

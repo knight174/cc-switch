@@ -387,10 +387,7 @@ pub fn set_plugins_entries(entries: &Value) -> Result<OpenClawWriteOutcome, AppE
     let mut config = read_openclaw_config()?;
     let root = ensure_object(&mut config);
 
-    let mut plugins = root
-        .get("plugins")
-        .cloned()
-        .unwrap_or_else(|| json!({}));
+    let mut plugins = root.get("plugins").cloned().unwrap_or_else(|| json!({}));
     let plugins_obj = ensure_object(&mut plugins);
     plugins_obj.insert("entries".to_string(), entries.clone());
     root.insert("plugins".to_string(), plugins.clone());

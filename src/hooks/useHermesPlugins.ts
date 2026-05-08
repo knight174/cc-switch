@@ -14,7 +14,9 @@ export function useApplyHermesPluginSelection() {
     mutationFn: (enabledIds: string[]) =>
       hermesPluginsApi.applySelection(enabledIds),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["hermesPlugins", "installed"] });
+      queryClient.invalidateQueries({
+        queryKey: ["hermesPlugins", "installed"],
+      });
     },
   });
 }
@@ -24,7 +26,9 @@ export function useImportHermesPlugins() {
   return useMutation({
     mutationFn: () => hermesPluginsApi.importFromLive(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["hermesPlugins", "installed"] });
+      queryClient.invalidateQueries({
+        queryKey: ["hermesPlugins", "installed"],
+      });
     },
   });
 }

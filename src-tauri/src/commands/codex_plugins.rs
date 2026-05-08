@@ -124,8 +124,7 @@ pub fn apply_codex_plugin_selection(enabledIds: Vec<String>) -> Result<(), Strin
         }
     }
 
-    crate::config::atomic_write(&path, doc.to_string().as_bytes())
-        .map_err(|e| e.to_string())?;
+    crate::config::atomic_write(&path, doc.to_string().as_bytes()).map_err(|e| e.to_string())?;
 
     Ok(())
 }

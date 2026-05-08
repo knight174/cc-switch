@@ -21,7 +21,8 @@ export function useAddOpencodePlugin() {
 export function useRemoveOpencodePlugin() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (normalizedName: string) => opencodePluginsApi.remove(normalizedName),
+    mutationFn: (normalizedName: string) =>
+      opencodePluginsApi.remove(normalizedName),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["opencodePlugins", "all"] });
     },

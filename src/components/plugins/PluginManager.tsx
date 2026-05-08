@@ -7,7 +7,13 @@ import CodexPluginTab from "./CodexPluginTab";
 import HermesPluginTab from "./HermesPluginTab";
 import GeminiPluginTab from "./GeminiPluginTab";
 
-type PluginTab = "claude" | "opencode" | "openclaw" | "codex" | "hermes" | "gemini";
+type PluginTab =
+  | "claude"
+  | "opencode"
+  | "openclaw"
+  | "codex"
+  | "hermes"
+  | "gemini";
 
 export default function PluginManager() {
   const [activeTab, setActiveTab] = useState<PluginTab>("claude");

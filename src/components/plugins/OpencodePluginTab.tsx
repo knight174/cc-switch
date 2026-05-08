@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, Trash2, Download, ArrowUp, ArrowDown, Puzzle } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Download,
+  ArrowUp,
+  ArrowDown,
+  Puzzle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,7 +38,9 @@ export default function OpencodePluginTab() {
       setNewPlugin("");
       toast.success(t("common.success"));
     } catch (error) {
-      toast.error(t("plugins.applyFailed"), { description: extractErrorMessage(error) });
+      toast.error(t("plugins.applyFailed"), {
+        description: extractErrorMessage(error),
+      });
     }
   };
 
@@ -40,7 +49,9 @@ export default function OpencodePluginTab() {
       await removePlugin.mutateAsync(normalizedName);
       toast.success(t("common.success"));
     } catch (error) {
-      toast.error(t("plugins.applyFailed"), { description: extractErrorMessage(error) });
+      toast.error(t("plugins.applyFailed"), {
+        description: extractErrorMessage(error),
+      });
     }
   };
 
@@ -56,7 +67,9 @@ export default function OpencodePluginTab() {
     try {
       await reorderPlugins.mutateAsync(newOrder.map((p) => p.normalized_name));
     } catch (error) {
-      toast.error(t("plugins.applyFailed"), { description: extractErrorMessage(error) });
+      toast.error(t("plugins.applyFailed"), {
+        description: extractErrorMessage(error),
+      });
     }
   };
 
@@ -65,7 +78,9 @@ export default function OpencodePluginTab() {
       const imported = await importPlugins.mutateAsync();
       toast.success(t("plugins.importSuccess", { count: imported.length }));
     } catch (error) {
-      toast.error(t("plugins.importFailed"), { description: extractErrorMessage(error) });
+      toast.error(t("plugins.importFailed"), {
+        description: extractErrorMessage(error),
+      });
     }
   };
 
@@ -90,7 +105,9 @@ export default function OpencodePluginTab() {
       </div>
 
       {isLoading ? (
-        <div className="text-muted-foreground text-sm">{t("common.loading")}</div>
+        <div className="text-muted-foreground text-sm">
+          {t("common.loading")}
+        </div>
       ) : !plugins || plugins.length === 0 ? (
         <div className="text-center py-12">
           <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
@@ -109,7 +126,9 @@ export default function OpencodePluginTab() {
             <div
               key={plugin.normalized_name}
               className={`flex items-center justify-between px-4 py-3 ${
-                index !== plugins.length - 1 ? "border-b border-border-default" : ""
+                index !== plugins.length - 1
+                  ? "border-b border-border-default"
+                  : ""
               }`}
             >
               <div className="flex flex-col min-w-0 flex-1">

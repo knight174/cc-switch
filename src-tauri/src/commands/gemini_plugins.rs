@@ -81,10 +81,7 @@ fn is_extension_enabled(
 pub fn get_gemini_installed_plugins() -> Result<Vec<GeminiInstalledPlugin>, String> {
     let extensions_dir = get_gemini_extensions_dir();
     let enablement = read_extension_enablement();
-    let home_dir = get_home_dir()
-        .to_str()
-        .unwrap_or("/")
-        .to_string();
+    let home_dir = get_home_dir().to_str().unwrap_or("/").to_string();
 
     let mut plugins = Vec::new();
 
@@ -134,10 +131,7 @@ pub fn get_gemini_installed_plugins() -> Result<Vec<GeminiInstalledPlugin>, Stri
 #[tauri::command]
 pub fn apply_gemini_plugin_selection(enabledIds: Vec<String>) -> Result<(), String> {
     let mut enablement = read_extension_enablement();
-    let home_dir = get_home_dir()
-        .to_str()
-        .unwrap_or("/")
-        .to_string();
+    let home_dir = get_home_dir().to_str().unwrap_or("/").to_string();
     let disable_pattern = format!("!{}/*", home_dir);
 
     let enabled_set: HashSet<String> = enabledIds.into_iter().collect();

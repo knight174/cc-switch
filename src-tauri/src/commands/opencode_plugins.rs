@@ -1,6 +1,8 @@
 #![allow(non_snake_case)]
 
-use crate::opencode_config::{canonicalize_plugin_name, read_opencode_config, write_opencode_config};
+use crate::opencode_config::{
+    canonicalize_plugin_name, read_opencode_config, write_opencode_config,
+};
 use serde_json::{json, Value};
 
 /// OpenCode 插件条目
@@ -91,9 +93,7 @@ pub fn add_opencode_plugin(name: String) -> Result<(), String> {
                 });
             }
 
-            let already_exists = arr
-                .iter()
-                .any(|v| v.as_str() == Some(normalized.as_str()));
+            let already_exists = arr.iter().any(|v| v.as_str() == Some(normalized.as_str()));
             if !already_exists {
                 arr.push(Value::String(normalized));
             }
@@ -179,9 +179,6 @@ pub fn reorder_opencode_plugins(names: Vec<String>) -> Result<(), String> {
 #[tauri::command]
 pub fn import_opencode_plugins_from_live() -> Result<Vec<String>, String> {
     let plugins = read_opencode_plugins_from_live()?;
-    let names: Vec<String> = plugins
-        .into_iter()
-        .map(|p| p.normalized_name)
-        .collect();
+    let names: Vec<String> = plugins.into_iter().map(|p| p.normalized_name).collect();
     Ok(names)
 }

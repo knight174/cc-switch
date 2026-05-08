@@ -15,19 +15,24 @@ export default function GeminiPluginTab() {
 
   const initialEnabledIds = useMemo(() => {
     if (!installedPlugins) return undefined;
-    return new Set(
-      installedPlugins.filter((p) => p.enabled).map((p) => p.id),
-    );
+    return new Set(installedPlugins.filter((p) => p.enabled).map((p) => p.id));
   }, [installedPlugins]);
 
-  const { selectedIds, hasChanges, isApplying, isImporting, handleToggle, handleApply, handleImport } =
-    useCheckboxPluginTab({
-      installedPlugins,
-      isLoading,
-      initialEnabledIds,
-      applyMutation,
-      importMutation,
-    });
+  const {
+    selectedIds,
+    hasChanges,
+    isApplying,
+    isImporting,
+    handleToggle,
+    handleApply,
+    handleImport,
+  } = useCheckboxPluginTab({
+    installedPlugins,
+    isLoading,
+    initialEnabledIds,
+    applyMutation,
+    importMutation,
+  });
 
   return (
     <CheckboxPluginTab<GeminiInstalledPlugin>

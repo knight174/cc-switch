@@ -42,9 +42,7 @@ pub fn get_openclaw_installed_plugins() -> Result<Vec<OpenClawInstalledPlugin>, 
 /// 取消勾选 → 将同一字段设为 false。
 /// 仅修改已存在于 plugins.entries 中的插件，不会新增或删除条目。
 #[tauri::command]
-pub fn apply_openclaw_plugin_selection(
-    enabledIds: Vec<String>,
-) -> Result<(), String> {
+pub fn apply_openclaw_plugin_selection(enabledIds: Vec<String>) -> Result<(), String> {
     let config = read_openclaw_config().map_err(|e| e.to_string())?;
 
     let mut entries = config

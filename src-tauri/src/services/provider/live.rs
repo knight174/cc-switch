@@ -720,7 +720,8 @@ pub(crate) fn write_live_snapshot(app_type: &AppType, provider: &Provider) -> Re
                 }
             };
 
-            std::fs::write(&config_path, config_to_write).map_err(|e| AppError::io(&config_path, e))?;
+            std::fs::write(&config_path, config_to_write)
+                .map_err(|e| AppError::io(&config_path, e))?;
         }
         AppType::Gemini => {
             // Delegate to write_gemini_live which handles env file writing correctly

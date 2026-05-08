@@ -14,7 +14,9 @@ export function useApplyGeminiPluginSelection() {
     mutationFn: (enabledIds: string[]) =>
       geminiPluginsApi.applySelection(enabledIds),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["geminiPlugins", "installed"] });
+      queryClient.invalidateQueries({
+        queryKey: ["geminiPlugins", "installed"],
+      });
     },
   });
 }
@@ -24,7 +26,9 @@ export function useImportGeminiPlugins() {
   return useMutation({
     mutationFn: () => geminiPluginsApi.importFromLive(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["geminiPlugins", "installed"] });
+      queryClient.invalidateQueries({
+        queryKey: ["geminiPlugins", "installed"],
+      });
     },
   });
 }
