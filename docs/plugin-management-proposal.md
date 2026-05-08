@@ -121,10 +121,10 @@ flowchart LR
 
 ### 5.2 进行中 / 待办
 
-- [ ] **Codex P1 验证**:确认 `~/.agents/plugins/marketplace.json` 是否始终同步到 `config.toml` 的 `[plugins]`;若不同步需合并读。
+- [x] **Codex P1 验证**:确认 `~/.agents/plugins/marketplace.json` 是否始终同步到 `config.toml` 的 `[plugins]`;若不同步需合并读。—— ✅ 已完成 (`b3aff3bb`)。
 - [ ] **OpenClaw P2 增强**(可选):利用 `plugins/installs.json` 展示版本号;在全局 `plugins.enabled = false` 时给出明显提示。
-- [ ] **错误文案 i18n 补全**:Apply 失败、配置解析异常等边界文案的中/英/日补齐。
-- [ ] **回归测试**:对 6 个 provider 的 `import → toggle → apply` 链路加 e2e 用例。
+- [x] **错误文案 i18n 补全**:Apply 失败、配置解析异常等边界文案的中/英/日补齐。—— ✅ 已完成 (`490451f6`, `8e788ddb`)。
+- [ ] **回归测试**:对 6 个 provider 的 `import → toggle → apply` 链路加 e2e 用例。—— 暂缓至后续迭代。
 
 ---
 
