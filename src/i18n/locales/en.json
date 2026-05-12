@@ -1345,7 +1345,15 @@
       "discoverError": "Failed to load plugins",
       "cliNotFound": "Claude CLI not found",
       "cliNotFoundDescription": "Please ensure 'claude' is in your PATH",
-      "installedBadge": "Installed"
+      "installedBadge": "Installed",
+      "checkUpdates": "Check Updates",
+      "updateAll": "Update All ({{count}})",
+      "updateAvailable": "Update available",
+      "updatesAvailable": "{{count}} updates available",
+      "allUpToDate": "All plugins are up to date",
+      "checkUpdatesFailed": "Failed to check updates",
+      "updateAllSuccess": "Updated {{count}} plugins",
+      "updateAllPartial": "Updated {{success}}, failed {{failed}}"
     },
     "opencode": {
       "addPlaceholder": "e.g. oh-my-openagent",

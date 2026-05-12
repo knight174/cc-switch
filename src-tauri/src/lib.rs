@@ -1144,6 +1144,7 @@ pub fn run() {
             commands::apply_claude_plugin_selection,
             commands::import_claude_plugins_from_live,
             commands::get_claude_marketplace_plugins,
+            commands::check_claude_plugin_updates,
             commands::install_claude_marketplace_plugin,
             commands::uninstall_claude_marketplace_plugin,
             commands::update_claude_marketplace_plugin,

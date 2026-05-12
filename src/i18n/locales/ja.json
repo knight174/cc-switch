@@ -1345,7 +1345,15 @@
       "discoverError": "プラグインリストの読み込みに失敗しました",
       "cliNotFound": "Claude CLI が見つかりません",
       "cliNotFoundDescription": "claude が PATH に含まれていることを確認してください",
-      "installedBadge": "インストール済み"
+      "installedBadge": "インストール済み",
+      "checkUpdates": "更新を確認",
+      "updateAll": "すべて更新 ({{count}})",
+      "updateAvailable": "更新可能",
+      "updatesAvailable": "{{count}} 件の更新があります",
+      "allUpToDate": "すべてのプラグインは最新です",
+      "checkUpdatesFailed": "更新の確認に失敗しました",
+      "updateAllSuccess": "{{count}} 件のプラグインを更新しました",
+      "updateAllPartial": "成功 {{success}} 件、失敗 {{failed}} 件"
     },
     "opencode": {
       "addPlaceholder": "例: oh-my-openagent",

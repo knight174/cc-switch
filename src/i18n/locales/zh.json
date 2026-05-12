@@ -1345,7 +1345,15 @@
       "discoverError": "加载插件列表失败",
       "cliNotFound": "未找到 Claude CLI",
       "cliNotFoundDescription": "请确保 claude 已添加到 PATH 中",
-      "installedBadge": "已安装"
+      "installedBadge": "已安装",
+      "checkUpdates": "检查更新",
+      "updateAll": "全部更新 ({{count}})",
+      "updateAvailable": "有更新",
+      "updatesAvailable": "有 {{count}} 个更新",
+      "allUpToDate": "所有插件已是最新",
+      "checkUpdatesFailed": "检查更新失败",
+      "updateAllSuccess": "已更新 {{count}} 个插件",
+      "updateAllPartial": "成功 {{success}} 个，失败 {{failed}} 个"
     },
     "opencode": {
       "addPlaceholder": "例如: oh-my-openagent",

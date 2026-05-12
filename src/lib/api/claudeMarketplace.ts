@@ -18,6 +18,12 @@ export interface ClaudeMarketplacePlugin {
   installCount: number;
 }
 
+export interface ClaudePluginUpdateInfo {
+  id: string;
+  current_version: string;
+  has_update: boolean;
+}
+
 export interface ClaudeMarketplaceListOutput {
   installed: ClaudeMarketplaceInstalled[];
   available: ClaudeMarketplacePlugin[];
@@ -42,5 +48,9 @@ export const claudeMarketplaceApi = {
 
   async refresh(): Promise<void> {
     return await invoke("refresh_claude_marketplace");
+  },
+
+  async checkUpdates(): Promise<ClaudePluginUpdateInfo[]> {
+    return await invoke("check_claude_plugin_updates");
   },
 };

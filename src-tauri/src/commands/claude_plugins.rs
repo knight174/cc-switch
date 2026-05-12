@@ -290,6 +290,140 @@ pub fn get_claude_marketplace_plugins() -> Result<ClaudeMarketplaceListOutput, S
     serde_json::from_str(&output).map_err(|e| format!("Failed to parse CLI output: {}", e))
 }
 
+#[derive(Debug, Clone, Serialize)]
+pub struct ClaudePluginUpdateInfo {
+    pub id: String,
+    pub current_version: String,
+    pub has_update: bool,
+}
+
+#[tauri::command]
+pub fn check_claude_plugin_updates() -> Result<Vec<ClaudePluginUpdateInfo>, String> {
+    let home = dirs::home_dir().ok_or_else(|| "Failed to get user home directory".to_string())?;
+    let installed_path = home
+        .join(".claude")
+        .join("plugins")
+        .join("installed_plugins.json");
+    let marketplace_path = home
+        .join(".claude")
+        .join("plugins")
+        .join("marketplaces")
+        .join("claude-plugins-official")
+        .join(".claude-plugin")
+        .join("marketplace.json");
+
+    if !installed_path.exists() {
+        return Ok(Vec::new());
+    }
+
+    let installed_text = std::fs::read_to_string(&installed_path).map_err(|e| e.to_string())?;
+    let installed_json: Value =
+        serde_json::from_str(&installed_text).map_err(|e| e.to_string())?;
+    let Some(plugins_obj) = installed_json.get("plugins").and_then(|v| v.as_object()) else {
+        return Ok(Vec::new());
+    };
+
+    // Build map: plugin_name -> marketplace SHA
+    let mut mkt_shas: HashMap<String, String> = HashMap::new();
+    if marketplace_path.exists() {
+        let mkt_text = std::fs::read_to_string(&marketplace_path).map_err(|e| e.to_string())?;
+        let mkt_json: Value = serde_json::from_str(&mkt_text).map_err(|e| e.to_string())?;
+        if let Some(mkt_plugins) = mkt_json.get("plugins").and_then(|v| v.as_array()) {
+            for p in mkt_plugins {
+                let name = p.get("name").and_then(|v| v.as_str()).unwrap_or("");
+                let sha = p
+                    .get("source")
+                    .and_then(|s| s.as_object())
+                    .and_then(|s| s.get("sha"))
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
+                if !name.is_empty() && !sha.is_empty() {
+                    mkt_shas.insert(name.to_string(), sha.to_string());
+                }
+            }
+        }
+    }
+
+    // Also check version by reading marketplace plugin.json for internal plugins
+    let mkt_plugins_dir = home
+        .join(".claude")
+        .join("plugins")
+        .join("marketplaces")
+        .join("claude-plugins-official")
+        .join("plugins");
+    let mkt_ext_dir = home
+        .join(".claude")
+        .join("plugins")
+        .join("marketplaces")
+        .join("claude-plugins-official")
+        .join("external_plugins");
+
+    let mut mkt_versions: HashMap<String, String> = HashMap::new();
+    for dir in [&mkt_plugins_dir, &mkt_ext_dir] {
+        if let Ok(entries) = std::fs::read_dir(dir) {
+            for entry in entries.flatten() {
+                let manifest = entry.path().join(".claude-plugin").join("plugin.json");
+                if manifest.exists() {
+                    if let Ok(text) = std::fs::read_to_string(&manifest) {
+                        if let Ok(json) = serde_json::from_str::<Value>(&text) {
+                            let name =
+                                json.get("name").and_then(|v| v.as_str()).unwrap_or("");
+                            let version =
+                                json.get("version").and_then(|v| v.as_str()).unwrap_or("");
+                            if !name.is_empty() && !version.is_empty() {
+                                mkt_versions.insert(name.to_string(), version.to_string());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    let mut result = Vec::new();
+    for (plugin_id, entries) in plugins_obj {
+        let Some(first) = entries.as_array().and_then(|a| a.first()) else {
+            continue;
+        };
+        let current_version = first
+            .get("version")
+            .and_then(|v| v.as_str())
+            .unwrap_or("unknown")
+            .to_string();
+        let installed_sha = first
+            .get("gitCommitSha")
+            .and_then(|v| v.as_str())
+            .unwrap_or("");
+
+        let name = plugin_id.split('@').next().unwrap_or(plugin_id);
+
+        let has_update = if !installed_sha.is_empty() {
+            // SHA-based comparison (external plugins)
+            mkt_shas
+                .get(name)
+                .map(|mkt_sha| mkt_sha != installed_sha)
+                .unwrap_or(false)
+        } else if current_version != "unknown" {
+            // Version-based comparison (internal plugins)
+            mkt_versions
+                .get(name)
+                .map(|mkt_ver| mkt_ver != &current_version)
+                .unwrap_or(false)
+        } else {
+            // unknown version, suggest update
+            true
+        };
+
+        result.push(ClaudePluginUpdateInfo {
+            id: plugin_id.clone(),
+            current_version,
+            has_update,
+        });
+    }
+
+    Ok(result)
+}
+
 #[tauri::command]
 pub fn install_claude_marketplace_plugin(pluginId: String) -> Result<(), String> {
     run_claude_plugin_cmd(&["plugin", "install", &pluginId, "-s", "user"])?;

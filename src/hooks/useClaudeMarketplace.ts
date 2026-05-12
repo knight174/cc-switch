@@ -105,3 +105,11 @@ export function useRefreshClaudeMarketplace() {
     },
   });
 }
+
+export function useCheckClaudePluginUpdates() {
+  return useQuery({
+    queryKey: ["claudePlugins", "updates"],
+    queryFn: () => claudeMarketplaceApi.checkUpdates(),
+    enabled: false,
+  });
+}
