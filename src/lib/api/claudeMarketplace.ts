@@ -16,6 +16,10 @@ export interface ClaudeMarketplacePlugin {
   description: string;
   marketplaceName: string;
   installCount: number;
+  source?: {
+    source: string;
+    url: string;
+  };
 }
 
 export interface ClaudePluginUpdateInfo {

@@ -1356,7 +1356,8 @@
       "updateAllPartial": "成功 {{success}} 件、失敗 {{failed}} 件",
       "filterAll": "すべて",
       "filterInstalled": "インストール済み",
-      "filterNotInstalled": "未インストール"
+      "filterNotInstalled": "未インストール",
+      "view": "表示"
     },
     "opencode": {
       "addPlaceholder": "例: oh-my-openagent",

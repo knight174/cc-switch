@@ -7,6 +7,7 @@ import {
   Loader2,
   AlertCircle,
   Trash2,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ import {
 } from "@/hooks/useClaudeMarketplace";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@/utils/errorUtils";
+import { settingsApi } from "@/lib/api";
 
 function formatInstallCount(count: number): string {
   if (count >= 1000) {
@@ -257,7 +259,21 @@ export default function ClaudeDiscoverTab() {
                     {plugin.description}
                   </p>
                 </CardContent>
-                <CardFooter className="pt-3 border-t border-border/50 relative z-10">
+                <CardFooter className="flex gap-2 pt-3 border-t border-border/50 relative z-10">
+                  {plugin.source?.url && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        settingsApi.openExternal(plugin.source!.url)
+                      }
+                      disabled={busy}
+                      className="flex-1"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                      {t("plugins.claude.view")}
+                    </Button>
+                  )}
                   {installed ? (
                     <Button
                       variant="outline"

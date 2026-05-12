@@ -222,6 +222,14 @@ pub fn import_claude_plugins_from_live() -> Result<Vec<String>, String> {
 // ─── Marketplace Commands ────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ClaudeMarketplacePluginSource {
+    #[serde(default)]
+    pub source: String,
+    #[serde(default)]
+    pub url: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClaudeMarketplacePlugin {
     #[serde(rename = "pluginId")]
     pub plugin_id: String,
@@ -233,6 +241,8 @@ pub struct ClaudeMarketplacePlugin {
     pub marketplace_name: String,
     #[serde(rename = "installCount", default)]
     pub install_count: u64,
+    #[serde(default)]
+    pub source: Option<ClaudeMarketplacePluginSource>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

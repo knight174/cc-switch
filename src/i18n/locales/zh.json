@@ -1356,7 +1356,8 @@
       "updateAllPartial": "成功 {{success}} 个，失败 {{failed}} 个",
       "filterAll": "全部",
       "filterInstalled": "已安装",
-      "filterNotInstalled": "未安装"
+      "filterNotInstalled": "未安装",
+      "view": "查看"
     },
     "opencode": {
       "addPlaceholder": "例如: oh-my-openagent",

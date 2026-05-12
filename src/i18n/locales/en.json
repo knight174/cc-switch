@@ -1356,7 +1356,8 @@
       "updateAllPartial": "Updated {{success}}, failed {{failed}}",
       "filterAll": "All",
       "filterInstalled": "Installed",
-      "filterNotInstalled": "Not Installed"
+      "filterNotInstalled": "Not Installed",
+      "view": "View"
     },
     "opencode": {
       "addPlaceholder": "e.g. oh-my-openagent",
