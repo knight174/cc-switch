@@ -11,6 +11,7 @@ import {
 import {
   useUninstallClaudePlugin,
   useUpdateClaudePlugin,
+  useClaudeMarketplaceList,
 } from "@/hooks/useClaudeMarketplace";
 import { useCheckboxPluginTab } from "@/hooks/useCheckboxPluginTab";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -38,6 +39,15 @@ export default function ClaudePluginTab() {
   const importMutation = useImportClaudePlugins();
   const uninstallMutation = useUninstallClaudePlugin();
   const updateMutation = useUpdateClaudePlugin();
+  const { data: marketplaceData } = useClaudeMarketplaceList();
+
+  const descriptionMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const p of marketplaceData?.available ?? []) {
+      if (p.description) map.set(p.pluginId, p.description);
+    }
+    return map;
+  }, [marketplaceData?.available]);
 
   const initialEnabledIds = useMemo(() => {
     if (!globalPlugins) return undefined;
@@ -127,6 +137,14 @@ export default function ClaudePluginTab() {
             <span className="flex items-center gap-2">
               <span>
                 v{plugin.version} · {plugin.scope}
+                {descriptionMap.has(plugin.id) && (
+                  <span
+                    className="ml-2 text-muted-foreground/70 truncate inline-block max-w-[200px] align-bottom"
+                    title={descriptionMap.get(plugin.id)}
+                  >
+                    — {descriptionMap.get(plugin.id)}
+                  </span>
+                )}
               </span>
               <Button
                 variant="ghost"

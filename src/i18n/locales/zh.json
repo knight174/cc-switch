@@ -1344,7 +1344,8 @@
       "noResultsDescription": "试试其他搜索词",
       "discoverError": "加载插件列表失败",
       "cliNotFound": "未找到 Claude CLI",
-      "cliNotFoundDescription": "请确保 claude 已添加到 PATH 中"
+      "cliNotFoundDescription": "请确保 claude 已添加到 PATH 中",
+      "installedBadge": "已安装"
     },
     "opencode": {
       "addPlaceholder": "例如: oh-my-openagent",

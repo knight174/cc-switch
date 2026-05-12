@@ -1344,7 +1344,8 @@
       "noResultsDescription": "別の検索語をお試しください",
       "discoverError": "プラグインリストの読み込みに失敗しました",
       "cliNotFound": "Claude CLI が見つかりません",
-      "cliNotFoundDescription": "claude が PATH に含まれていることを確認してください"
+      "cliNotFoundDescription": "claude が PATH に含まれていることを確認してください",
+      "installedBadge": "インストール済み"
     },
     "opencode": {
       "addPlaceholder": "例: oh-my-openagent",

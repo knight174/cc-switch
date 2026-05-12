@@ -1344,7 +1344,8 @@
       "noResultsDescription": "Try a different search term",
       "discoverError": "Failed to load plugins",
       "cliNotFound": "Claude CLI not found",
-      "cliNotFoundDescription": "Please ensure 'claude' is in your PATH"
+      "cliNotFoundDescription": "Please ensure 'claude' is in your PATH",
+      "installedBadge": "Installed"
     },
     "opencode": {
       "addPlaceholder": "e.g. oh-my-openagent",

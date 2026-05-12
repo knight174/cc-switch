@@ -6,9 +6,18 @@ import {
   Download,
   Loader2,
   AlertCircle,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -19,6 +28,7 @@ import {
 import {
   useClaudeMarketplaceList,
   useInstallClaudePlugin,
+  useUninstallClaudePlugin,
   useRefreshClaudeMarketplace,
 } from "@/hooks/useClaudeMarketplace";
 import { toast } from "sonner";
@@ -35,10 +45,11 @@ export default function ClaudeDiscoverTab() {
   const { t } = useTranslation();
   const { data, isLoading, error } = useClaudeMarketplaceList();
   const installMutation = useInstallClaudePlugin();
+  const uninstallMutation = useUninstallClaudePlugin();
   const refreshMutation = useRefreshClaudeMarketplace();
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<"popular" | "name">("popular");
-  const [installingId, setInstallingId] = useState<string | null>(null);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const installedIds = useMemo(
     () => new Set(data?.installed.map((p) => p.id) ?? []),
@@ -46,22 +57,23 @@ export default function ClaudeDiscoverTab() {
   );
 
   const filteredPlugins = useMemo(() => {
-    let list =
-      data?.available.filter((p) => !installedIds.has(p.pluginId)) ?? [];
+    let list = data?.available ?? [];
     if (search) {
       const q = search.toLowerCase();
       list = list.filter((p) => p.name.toLowerCase().includes(q));
     }
     if (sort === "popular") {
-      list.sort((a, b) => (b.installCount || 0) - (a.installCount || 0));
+      list = [...list].sort(
+        (a, b) => (b.installCount || 0) - (a.installCount || 0),
+      );
     } else {
-      list.sort((a, b) => a.name.localeCompare(b.name));
+      list = [...list].sort((a, b) => a.name.localeCompare(b.name));
     }
     return list;
-  }, [data?.available, installedIds, search, sort]);
+  }, [data?.available, search, sort]);
 
   const handleInstall = async (pluginId: string, name: string) => {
-    setInstallingId(pluginId);
+    setLoadingId(pluginId);
     try {
       await installMutation.mutateAsync(pluginId);
       toast.success(t("plugins.claude.installSuccess", { name }));
@@ -70,7 +82,21 @@ export default function ClaudeDiscoverTab() {
         description: extractErrorMessage(err),
       });
     } finally {
-      setInstallingId(null);
+      setLoadingId(null);
+    }
+  };
+
+  const handleUninstall = async (pluginId: string, name: string) => {
+    setLoadingId(pluginId);
+    try {
+      await uninstallMutation.mutateAsync(pluginId);
+      toast.success(t("plugins.claude.uninstallSuccess", { name }));
+    } catch (err) {
+      toast.error(t("plugins.claude.uninstallFailed"), {
+        description: extractErrorMessage(err),
+      });
+    } finally {
+      setLoadingId(null);
     }
   };
 
@@ -87,7 +113,9 @@ export default function ClaudeDiscoverTab() {
 
   if (isLoading) {
     return (
-      <div className="text-muted-foreground text-sm">{t("common.loading")}</div>
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
     );
   }
 
@@ -95,16 +123,14 @@ export default function ClaudeDiscoverTab() {
     const msg = extractErrorMessage(error);
     const isCliNotFound = msg.includes("not found") || msg.includes("PATH");
     return (
-      <div className="text-center py-12">
-        <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
-          <AlertCircle className="w-6 h-6 text-muted-foreground" />
-        </div>
-        <h3 className="text-lg font-medium text-foreground mb-2">
+      <div className="flex flex-col items-center justify-center h-64 text-center">
+        <AlertCircle className="h-12 w-12 text-muted-foreground/30 mb-4" />
+        <p className="text-lg font-medium text-foreground">
           {isCliNotFound
             ? t("plugins.claude.cliNotFound")
             : t("plugins.claude.discoverError")}
-        </h3>
-        <p className="text-muted-foreground text-sm">
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
           {isCliNotFound ? t("plugins.claude.cliNotFoundDescription") : msg}
         </p>
       </div>
@@ -150,58 +176,104 @@ export default function ClaudeDiscoverTab() {
       </div>
 
       {filteredPlugins.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
-            <Search className="w-6 h-6 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-medium text-foreground mb-2">
+        <div className="flex flex-col items-center justify-center h-48 text-center">
+          <Search className="h-12 w-12 text-muted-foreground/30 mb-4" />
+          <p className="text-lg font-medium text-foreground">
             {t("plugins.claude.noResults")}
-          </h3>
-          <p className="text-muted-foreground text-sm">
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
             {t("plugins.claude.noResultsDescription")}
           </p>
         </div>
       ) : (
-        <div className="rounded-xl border border-border-default overflow-hidden">
-          {filteredPlugins.map((plugin, index) => (
-            <div
-              key={plugin.pluginId}
-              className={`flex items-center justify-between px-4 py-3 ${
-                index !== filteredPlugins.length - 1
-                  ? "border-b border-border-default"
-                  : ""
-              }`}
-            >
-              <div className="flex flex-col min-w-0 flex-1 mr-3">
-                <span className="text-sm font-medium">{plugin.name}</span>
-                <p
-                  className="text-xs text-muted-foreground line-clamp-2"
-                  title={plugin.description}
-                >
-                  {plugin.description}
-                </p>
-                <span className="text-xs text-muted-foreground mt-0.5">
-                  <Download className="w-3 h-3 inline mr-1" />
-                  {formatInstallCount(plugin.installCount || 0)} installs
-                </span>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={installingId === plugin.pluginId}
-                onClick={() => handleInstall(plugin.pluginId, plugin.name)}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredPlugins.map((plugin) => {
+            const installed = installedIds.has(plugin.pluginId);
+            const busy = loadingId === plugin.pluginId;
+            return (
+              <Card
+                key={plugin.pluginId}
+                className="glass-card flex flex-col h-full transition-all duration-300 hover:shadow-lg group relative overflow-hidden"
               >
-                {installingId === plugin.pluginId ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                    {t("plugins.claude.installing")}
-                  </>
-                ) : (
-                  t("plugins.claude.install")
-                )}
-              </Button>
-            </div>
-          ))}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="text-base font-semibold truncate flex-1">
+                      {plugin.name}
+                    </CardTitle>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {(plugin.installCount || 0) > 0 && (
+                        <Badge
+                          variant="secondary"
+                          className="text-[10px] px-1.5 py-0 h-4"
+                        >
+                          <Download className="h-2.5 w-2.5 mr-0.5" />
+                          {formatInstallCount(plugin.installCount || 0)}
+                        </Badge>
+                      )}
+                      {installed && (
+                        <Badge
+                          variant="default"
+                          className="bg-green-600/90 hover:bg-green-600 dark:bg-green-700/90 dark:hover:bg-green-700 text-white border-0 text-[10px] px-1.5 py-0 h-4"
+                        >
+                          {t("plugins.claude.installedBadge")}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="flex-1 pt-0">
+                  <p
+                    className="text-sm text-muted-foreground/90 line-clamp-3 leading-relaxed"
+                    title={plugin.description}
+                  >
+                    {plugin.description}
+                  </p>
+                </CardContent>
+                <CardFooter className="pt-3 border-t border-border/50 relative z-10">
+                  {installed ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        handleUninstall(plugin.pluginId, plugin.name)
+                      }
+                      disabled={busy}
+                      className="flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/50 dark:hover:text-red-300"
+                    >
+                      {busy ? (
+                        <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                      )}
+                      {busy
+                        ? t("plugins.claude.uninstalling")
+                        : t("plugins.claude.uninstall")}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="mcp"
+                      size="sm"
+                      onClick={() =>
+                        handleInstall(plugin.pluginId, plugin.name)
+                      }
+                      disabled={busy}
+                      className="flex-1"
+                    >
+                      {busy ? (
+                        <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                      ) : (
+                        <Download className="h-3.5 w-3.5 mr-1.5" />
+                      )}
+                      {busy
+                        ? t("plugins.claude.installing")
+                        : t("plugins.claude.install")}
+                    </Button>
+                  )}
+                </CardFooter>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>
