@@ -1353,7 +1353,10 @@
       "allUpToDate": "所有插件已是最新",
       "checkUpdatesFailed": "检查更新失败",
       "updateAllSuccess": "已更新 {{count}} 个插件",
-      "updateAllPartial": "成功 {{success}} 个，失败 {{failed}} 个"
+      "updateAllPartial": "成功 {{success}} 个，失败 {{failed}} 个",
+      "filterAll": "全部",
+      "filterInstalled": "已安装",
+      "filterNotInstalled": "未安装"
     },
     "opencode": {
       "addPlaceholder": "例如: oh-my-openagent",

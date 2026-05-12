@@ -1353,7 +1353,10 @@
       "allUpToDate": "すべてのプラグインは最新です",
       "checkUpdatesFailed": "更新の確認に失敗しました",
       "updateAllSuccess": "{{count}} 件のプラグインを更新しました",
-      "updateAllPartial": "成功 {{success}} 件、失敗 {{failed}} 件"
+      "updateAllPartial": "成功 {{success}} 件、失敗 {{failed}} 件",
+      "filterAll": "すべて",
+      "filterInstalled": "インストール済み",
+      "filterNotInstalled": "未インストール"
     },
     "opencode": {
       "addPlaceholder": "例: oh-my-openagent",

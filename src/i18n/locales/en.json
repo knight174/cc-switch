@@ -1353,7 +1353,10 @@
       "allUpToDate": "All plugins are up to date",
       "checkUpdatesFailed": "Failed to check updates",
       "updateAllSuccess": "Updated {{count}} plugins",
-      "updateAllPartial": "Updated {{success}}, failed {{failed}}"
+      "updateAllPartial": "Updated {{success}}, failed {{failed}}",
+      "filterAll": "All",
+      "filterInstalled": "Installed",
+      "filterNotInstalled": "Not Installed"
     },
     "opencode": {
       "addPlaceholder": "e.g. oh-my-openagent",

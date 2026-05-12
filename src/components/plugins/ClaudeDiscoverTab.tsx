@@ -49,6 +49,9 @@ export default function ClaudeDiscoverTab() {
   const refreshMutation = useRefreshClaudeMarketplace();
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<"popular" | "name">("popular");
+  const [filterStatus, setFilterStatus] = useState<
+    "all" | "installed" | "uninstalled"
+  >("all");
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const installedIds = useMemo(
@@ -62,6 +65,11 @@ export default function ClaudeDiscoverTab() {
       const q = search.toLowerCase();
       list = list.filter((p) => p.name.toLowerCase().includes(q));
     }
+    if (filterStatus === "installed") {
+      list = list.filter((p) => installedIds.has(p.pluginId));
+    } else if (filterStatus === "uninstalled") {
+      list = list.filter((p) => !installedIds.has(p.pluginId));
+    }
     if (sort === "popular") {
       list = [...list].sort(
         (a, b) => (b.installCount || 0) - (a.installCount || 0),
@@ -70,7 +78,7 @@ export default function ClaudeDiscoverTab() {
       list = [...list].sort((a, b) => a.name.localeCompare(b.name));
     }
     return list;
-  }, [data?.available, search, sort]);
+  }, [data?.available, installedIds, search, sort, filterStatus]);
 
   const handleInstall = async (pluginId: string, name: string) => {
     setLoadingId(pluginId);
@@ -161,6 +169,25 @@ export default function ClaudeDiscoverTab() {
               {t("plugins.claude.sortPopular")}
             </SelectItem>
             <SelectItem value="name">{t("plugins.claude.sortName")}</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
+          value={filterStatus}
+          onValueChange={(v) =>
+            setFilterStatus(v as "all" | "installed" | "uninstalled")
+          }
+        >
+          <SelectTrigger className="w-[140px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("plugins.claude.filterAll")}</SelectItem>
+            <SelectItem value="installed">
+              {t("plugins.claude.filterInstalled")}
+            </SelectItem>
+            <SelectItem value="uninstalled">
+              {t("plugins.claude.filterNotInstalled")}
+            </SelectItem>
           </SelectContent>
         </Select>
         <Button
