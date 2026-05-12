@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 
 use crate::config::{get_claude_settings_path, read_json_file, write_json_file};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::HashMap;
 
@@ -217,4 +217,99 @@ pub fn import_claude_plugins_from_live() -> Result<Vec<String>, String> {
         .collect();
 
     Ok(enabled_ids)
+}
+
+// ─── Marketplace Commands ────────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ClaudeMarketplacePlugin {
+    #[serde(rename = "pluginId")]
+    pub plugin_id: String,
+    #[serde(default)]
+    pub name: String,
+    #[serde(default)]
+    pub description: String,
+    #[serde(rename = "marketplaceName", default)]
+    pub marketplace_name: String,
+    #[serde(rename = "installCount", default)]
+    pub install_count: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ClaudeMarketplaceInstalled {
+    pub id: String,
+    #[serde(default)]
+    pub version: String,
+    #[serde(default)]
+    pub scope: String,
+    #[serde(default)]
+    pub enabled: bool,
+    #[serde(rename = "installPath", default)]
+    pub install_path: String,
+    #[serde(rename = "installedAt", default)]
+    pub installed_at: String,
+    #[serde(rename = "lastUpdated", default)]
+    pub last_updated: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ClaudeMarketplaceListOutput {
+    pub installed: Vec<ClaudeMarketplaceInstalled>,
+    pub available: Vec<ClaudeMarketplacePlugin>,
+}
+
+fn run_claude_plugin_cmd(args: &[&str]) -> Result<String, String> {
+    let output = std::process::Command::new("claude")
+        .args(args)
+        .output()
+        .map_err(|e| {
+            if e.kind() == std::io::ErrorKind::NotFound {
+                "Claude CLI not found. Please ensure 'claude' is in your PATH.".to_string()
+            } else {
+                format!("Failed to execute claude CLI: {}", e)
+            }
+        })?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let msg = if stderr.trim().is_empty() {
+            stdout.trim().to_string()
+        } else {
+            stderr.trim().to_string()
+        };
+        return Err(msg);
+    }
+
+    Ok(String::from_utf8_lossy(&output.stdout).to_string())
+}
+
+#[tauri::command]
+pub fn get_claude_marketplace_plugins() -> Result<ClaudeMarketplaceListOutput, String> {
+    let output = run_claude_plugin_cmd(&["plugin", "list", "--json", "--available"])?;
+    serde_json::from_str(&output).map_err(|e| format!("Failed to parse CLI output: {}", e))
+}
+
+#[tauri::command]
+pub fn install_claude_marketplace_plugin(pluginId: String) -> Result<(), String> {
+    run_claude_plugin_cmd(&["plugin", "install", &pluginId, "-s", "user"])?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn uninstall_claude_marketplace_plugin(pluginId: String) -> Result<(), String> {
+    run_claude_plugin_cmd(&["plugin", "uninstall", &pluginId, "-s", "user", "-y"])?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn update_claude_marketplace_plugin(pluginId: String) -> Result<(), String> {
+    run_claude_plugin_cmd(&["plugin", "update", &pluginId])?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn refresh_claude_marketplace() -> Result<(), String> {
+    run_claude_plugin_cmd(&["plugin", "marketplace", "update"])?;
+    Ok(())
 }

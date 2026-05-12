@@ -1143,6 +1143,11 @@ pub fn run() {
             commands::get_claude_installed_plugins,
             commands::apply_claude_plugin_selection,
             commands::import_claude_plugins_from_live,
+            commands::get_claude_marketplace_plugins,
+            commands::install_claude_marketplace_plugin,
+            commands::uninstall_claude_marketplace_plugin,
+            commands::update_claude_marketplace_plugin,
+            commands::refresh_claude_marketplace,
             // OpenCode plugins
             commands::get_opencode_plugins,
             commands::add_opencode_plugin,
