@@ -229,6 +229,21 @@ pub struct ClaudeMarketplacePluginSource {
     pub url: String,
 }
 
+fn deserialize_source<'de, D>(deserializer: D) -> Result<Option<ClaudeMarketplacePluginSource>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let value: Value = Deserialize::deserialize(deserializer)?;
+    match value {
+        Value::Object(_) => {
+            let src: ClaudeMarketplacePluginSource = serde_json::from_value(value).map_err(serde::de::Error::custom)?;
+            Ok(Some(src))
+        }
+        Value::String(_) => Ok(None), // Ignore string sources (local paths)
+        _ => Ok(None),
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClaudeMarketplacePlugin {
     #[serde(rename = "pluginId")]
@@ -241,7 +256,7 @@ pub struct ClaudeMarketplacePlugin {
     pub marketplace_name: String,
     #[serde(rename = "installCount", default)]
     pub install_count: u64,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_source")]
     pub source: Option<ClaudeMarketplacePluginSource>,
 }
 
