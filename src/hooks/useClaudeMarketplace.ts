@@ -90,9 +90,6 @@ export function useUpdateClaudePlugin() {
       queryClient.invalidateQueries({
         queryKey: ["claudePlugins", "installed"],
       });
-      queryClient.invalidateQueries({
-        queryKey: ["claudePlugins", "updates"],
-      });
     },
   });
 }
@@ -106,13 +103,5 @@ export function useRefreshClaudeMarketplace() {
         queryKey: ["claudePlugins", "marketplace"],
       });
     },
-  });
-}
-
-export function useCheckClaudePluginUpdates() {
-  return useQuery({
-    queryKey: ["claudePlugins", "updates"],
-    queryFn: () => claudeMarketplaceApi.checkUpdates(),
-    enabled: false,
   });
 }
