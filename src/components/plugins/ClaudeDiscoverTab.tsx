@@ -62,14 +62,34 @@ export default function ClaudeDiscoverTab() {
   );
 
   const filteredPlugins = useMemo(() => {
-    let list = data?.available ?? [];
+    const available = data?.available ?? [];
+    const installed = data?.installed ?? [];
+
+    if (filterStatus === "installed") {
+      let list = installed.map((p) => ({
+        pluginId: p.id,
+        name: p.id.split("@")[0],
+        description: "",
+        marketplaceName: "",
+        installCount: 0,
+        source: undefined as { source: string; url: string } | undefined,
+      }));
+      if (search) {
+        const q = search.toLowerCase();
+        list = list.filter((p) => p.name.toLowerCase().includes(q));
+      }
+      if (sort === "name") {
+        list.sort((a, b) => a.name.localeCompare(b.name));
+      }
+      return list;
+    }
+
+    let list = available;
     if (search) {
       const q = search.toLowerCase();
       list = list.filter((p) => p.name.toLowerCase().includes(q));
     }
-    if (filterStatus === "installed") {
-      list = list.filter((p) => installedIds.has(p.pluginId));
-    } else if (filterStatus === "uninstalled") {
+    if (filterStatus === "uninstalled") {
       list = list.filter((p) => !installedIds.has(p.pluginId));
     }
     if (sort === "popular") {
@@ -80,7 +100,14 @@ export default function ClaudeDiscoverTab() {
       list = [...list].sort((a, b) => a.name.localeCompare(b.name));
     }
     return list;
-  }, [data?.available, installedIds, search, sort, filterStatus]);
+  }, [
+    data?.available,
+    data?.installed,
+    installedIds,
+    search,
+    sort,
+    filterStatus,
+  ]);
 
   const handleInstall = async (pluginId: string, name: string) => {
     setLoadingId(pluginId);
