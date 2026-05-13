@@ -107,7 +107,7 @@ export default function ClaudePluginTab() {
     try {
       await updateMutation.mutateAsync(pluginId);
       toast.success(t("plugins.claude.updateSuccess", { name }));
-      refetchUpdates();
+      await refetchUpdates();
     } catch (err) {
       toast.error(t("plugins.claude.updateFailed"), {
         description: extractErrorMessage(err),
@@ -148,7 +148,7 @@ export default function ClaudePluginTab() {
       }
     }
     setUpdatingAll(false);
-    refetchUpdates();
+    await refetchUpdates();
     if (failed === 0) {
       toast.success(t("plugins.claude.updateAllSuccess", { count: success }));
     } else {

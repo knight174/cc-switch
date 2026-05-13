@@ -90,6 +90,9 @@ export function useUpdateClaudePlugin() {
       queryClient.invalidateQueries({
         queryKey: ["claudePlugins", "installed"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["claudePlugins", "updates"],
+      });
     },
   });
 }
