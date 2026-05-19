@@ -61,19 +61,45 @@ export default function ClaudeDiscoverTab() {
     [data?.installed],
   );
 
+  // Build a lookup from marketplace data (keyed by name, since available uses
+  // pluginId like "name@marketplace" and installed uses the same format as id)
+  const marketplaceMap = useMemo(() => {
+    const map = new Map<
+      string,
+      { description: string; installCount: number; source?: { source: string; url: string } }
+    >();
+    for (const p of data?.available ?? []) {
+      map.set(p.pluginId, {
+        description: p.description,
+        installCount: p.installCount,
+        source: p.source,
+      });
+      // Also map by short name for installed plugins that may not appear in available
+      map.set(p.name, {
+        description: p.description,
+        installCount: p.installCount,
+        source: p.source,
+      });
+    }
+    return map;
+  }, [data?.available]);
+
   const filteredPlugins = useMemo(() => {
     const available = data?.available ?? [];
     const installed = data?.installed ?? [];
 
     if (filterStatus === "installed") {
-      let list = installed.map((p) => ({
-        pluginId: p.id,
-        name: p.id.split("@")[0],
-        description: "",
-        marketplaceName: "",
-        installCount: 0,
-        source: undefined as { source: string; url: string } | undefined,
-      }));
+      let list = installed.map((p) => {
+        const meta = marketplaceMap.get(p.id) || marketplaceMap.get(p.id.split("@")[0]);
+        return {
+          pluginId: p.id,
+          name: p.id.split("@")[0],
+          description: meta?.description ?? "",
+          marketplaceName: p.id.includes("@") ? p.id.split("@")[1] : "",
+          installCount: meta?.installCount ?? 0,
+          source: meta?.source,
+        };
+      });
       if (search) {
         const q = search.toLowerCase();
         list = list.filter((p) => p.name.toLowerCase().includes(q));

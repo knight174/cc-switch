@@ -316,6 +316,49 @@ pub fn get_claude_marketplace_plugins() -> Result<ClaudeMarketplaceListOutput, S
 }
 
 #[derive(Debug, Clone, Serialize)]
+pub struct ClaudePluginMeta {
+    pub name: String,
+    pub description: String,
+    pub homepage: String,
+}
+
+#[tauri::command]
+pub fn get_claude_plugin_metadata() -> Result<HashMap<String, ClaudePluginMeta>, String> {
+    let home = dirs::home_dir().ok_or_else(|| "Failed to get user home directory".to_string())?;
+    let marketplace_path = home
+        .join(".claude")
+        .join("plugins")
+        .join("marketplaces")
+        .join("claude-plugins-official")
+        .join(".claude-plugin")
+        .join("marketplace.json");
+
+    if !marketplace_path.exists() {
+        return Ok(HashMap::new());
+    }
+
+    let text = std::fs::read_to_string(&marketplace_path).map_err(|e| e.to_string())?;
+    let json: Value = serde_json::from_str(&text).map_err(|e| e.to_string())?;
+
+    let Some(plugins) = json.get("plugins").and_then(|v| v.as_array()) else {
+        return Ok(HashMap::new());
+    };
+
+    let mut result = HashMap::new();
+    for p in plugins {
+        let name = p.get("name").and_then(|v| v.as_str()).unwrap_or("").to_string();
+        if name.is_empty() {
+            continue;
+        }
+        let description = p.get("description").and_then(|v| v.as_str()).unwrap_or("").to_string();
+        let homepage = p.get("homepage").and_then(|v| v.as_str()).unwrap_or("").to_string();
+        result.insert(name.clone(), ClaudePluginMeta { name, description, homepage });
+    }
+
+    Ok(result)
+}
+
+#[derive(Debug, Clone, Serialize)]
 pub struct ClaudePluginUpdateInfo {
     pub id: String,
     pub current_version: String,
